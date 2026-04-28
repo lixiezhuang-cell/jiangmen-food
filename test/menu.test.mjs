@@ -141,8 +141,8 @@ test("custom dish pool additions and deletions are applied locally", () => {
   const allDishes = filtered.flatMap((category) => category.dishes);
 
   assert.deepEqual(deduped, ["五邑小炒"]);
-  assert.equal(withCustom.at(-1).name, "自定义菜品");
-  assert.ok(withCustom.at(-1).dishes.includes("五邑小炒"));
+  assert.equal(withCustom[0].name, "自定义菜品");
+  assert.ok(withCustom[0].dishes.includes("五邑小炒"));
   assert.deepEqual(removedCustom.customDishes, []);
   assert.deepEqual(hiddenBuiltIn.deletedDishes, ["豉汁排骨"]);
   assert.equal(allDishes.includes("豉汁排骨"), false);

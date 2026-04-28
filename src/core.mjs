@@ -188,7 +188,7 @@ export function mergeDishPool(dishPool, customDishes = [], deletedDishes = []) {
     .filter((category) => category.dishes.length > 0);
 
   if (custom.length) {
-    merged.push({ name: "自定义菜品", dishes: custom });
+    merged.unshift({ name: "自定义菜品", dishes: custom });
   }
 
   return merged;
