@@ -87,11 +87,19 @@ test("dish replacement uses menu overrides instead of creating future meal recor
   assert.match(appScript, /applyMenuOverridesToPlan\(MENU_PLAN,\s*state\.menuOverrides\)/);
   assert.match(appScript, /migratedFutureRecord/);
   assert.match(appScript, /saveMenuOverrides\(\)/);
-  assert.match(appScript, /target\.sourceView === "records"/);
+  assert.match(appScript, /if \(target\.sourceView === "records"\)/);
+  assert.doesNotMatch(appScript, /isExistingRecord/);
+  assert.doesNotMatch(appScript, /state\.mealRecords\.some\(\(record\) => record\.date === replaced\.date\)/);
 });
 
 test("manual meal records cannot be created for future dates", () => {
   assert.match(appScript, /function recordCurrentPlan\(\)/);
   assert.match(appScript, /state\.currentPlan\.date > formatDate\(new Date\(\)\)/);
   assert.match(appScript, /未来日期不能记录/);
+});
+
+test("records view prunes stale future records from older cached data", () => {
+  assert.match(appScript, /function pruneFutureMealRecords\(\)/);
+  assert.match(appScript, /state\.mealRecords = state\.mealRecords\.filter\(\(record\) => record\.date <= today\)/);
+  assert.match(appScript, /pruneFutureMealRecords\(\);\n    recordCount\.textContent/);
 });

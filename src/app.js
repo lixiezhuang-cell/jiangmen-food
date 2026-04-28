@@ -324,6 +324,21 @@
     window.localStorage.setItem(OVERRIDES_STORAGE_KEY, JSON.stringify(state.menuOverrides));
   }
 
+  function pruneFutureMealRecords() {
+    const today = formatDate(new Date());
+    const futureRecords = state.mealRecords.filter((record) => record.date > today);
+    if (!futureRecords.length) {
+      return;
+    }
+
+    for (const record of futureRecords) {
+      state.menuOverrides = upsertMenuOverride(state.menuOverrides, record);
+    }
+    state.mealRecords = state.mealRecords.filter((record) => record.date <= today);
+    saveMenuOverrides();
+    saveMealRecords();
+  }
+
   function loadCatalogState() {
     try {
       const value = window.localStorage.getItem(CATALOG_STORAGE_KEY);
@@ -681,6 +696,7 @@
   }
 
   function renderRecords() {
+    pruneFutureMealRecords();
     recordCount.textContent = `${state.mealRecords.length} 条`;
     recordList.replaceChildren(
       ...state.mealRecords.map((record) => {
@@ -743,7 +759,7 @@
       return;
     }
 
-    if (target.sourceView === "records" || state.mealRecords.some((record) => record.date === replaced.date)) {
+    if (target.sourceView === "records") {
       state.mealRecords = upsertMealRecord(state.mealRecords, replaced);
       saveMealRecords();
     } else {
