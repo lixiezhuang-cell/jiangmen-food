@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#173c38" />
+    <title>今晚吃什么</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="today-panel" aria-labelledby="app-title">
+        <div class="topbar">
+          <div>
+            <p class="eyebrow" id="dateLabel">2026</p>
+            <h1 id="app-title">今晚吃什么</h1>
+          </div>
+          <button class="icon-button" id="ruleButton" type="button" aria-label="忌口规则">!</button>
+        </div>
+
+        <article class="recommendation" aria-live="polite">
+          <div class="style-pill" id="styleLabel">江门广式</div>
+          <h2 id="comboTitle">加载中</h2>
+          <div class="dish-list" id="dishList"></div>
+        </article>
+
+        <div class="actions">
+          <button class="primary-button" id="copyButton" type="button">复制</button>
+          <button class="secondary-button" id="shuffleButton" type="button">换一个</button>
+          <button class="ghost-button" id="todayButton" type="button">今天</button>
+        </div>
+
+        <div class="date-row">
+          <label for="datePicker">查日期</label>
+          <input id="datePicker" type="date" min="2026-01-01" max="2026-12-31" />
+        </div>
+      </section>
+
+      <section class="week-panel" aria-labelledby="week-title">
+        <div class="section-header">
+          <h2 id="week-title">本周菜单</h2>
+          <span id="toast" role="status"></span>
+        </div>
+        <div class="week-list" id="weekList"></div>
+      </section>
+    </main>
+
+    <dialog id="ruleDialog" class="rule-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <h2>点菜规则</h2>
+          <button class="icon-button small" value="close" aria-label="关闭">×</button>
+        </div>
+        <ul>
+          <li>无饭，粉面粥只偶尔出现。</li>
+          <li>避开鹅翼、鸭掌、海带结、鸭胗和指定点心。</li>
+          <li>避开虾蟹贝壳类；鱿鱼、田螺、鱼可以。</li>
+          <li>二人搭配，10 天内同一道菜不重复。</li>
+        </ul>
+      </form>
+    </dialog>
+
+    <script src="./src/menu-data.js"></script>
+    <script src="./src/core-browser.js"></script>
+    <script src="./src/app.js"></script>
+  </body>
+</html>
