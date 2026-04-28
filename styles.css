@@ -1,18 +1,21 @@
 :root {
   color-scheme: light;
-  --ink: #1f2724;
-  --muted: #727b76;
-  --paper: #f7f7f4;
-  --panel: #ffffff;
-  --line: #e3e6e1;
-  --green: #203d39;
-  --green-2: #526862;
-  --coral: #a9574c;
-  --amber: #b88a3c;
-  --wash: #f1f4f1;
-  --warm: #faf7ef;
-  --shadow: 0 10px 24px rgba(31, 39, 36, 0.06);
-  --soft-shadow: 0 5px 14px rgba(31, 39, 36, 0.05);
+  --ink: #1d1d1f;
+  --muted: #6e6e73;
+  --paper: #f5f5f7;
+  --panel: rgba(255, 255, 255, 0.72);
+  --line: rgba(60, 60, 67, 0.16);
+  --green: #007aff;
+  --green-2: #3a3a3c;
+  --coral: #ff453a;
+  --amber: #ff9f0a;
+  --wash: rgba(118, 118, 128, 0.12);
+  --warm: rgba(255, 255, 255, 0.56);
+  --shadow: 0 22px 54px rgba(0, 0, 0, 0.12);
+  --soft-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+  --glass: rgba(255, 255, 255, 0.64);
+  --glass-strong: rgba(255, 255, 255, 0.82);
+  --blue-wash: rgba(0, 122, 255, 0.1);
 }
 
 * {
@@ -22,7 +25,9 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--paper);
+  background:
+    linear-gradient(180deg, #fbfbfd 0%, #f5f5f7 42%, #edf4ff 100%),
+    var(--paper);
   color: var(--ink);
   font-family:
     -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
@@ -48,7 +53,7 @@ button {
 .app-shell {
   width: min(100%, 740px);
   margin: 0 auto;
-  padding: max(14px, env(safe-area-inset-top)) 12px calc(92px + env(safe-area-inset-bottom));
+  padding: max(16px, env(safe-area-inset-top)) 12px calc(94px + env(safe-area-inset-bottom));
 }
 
 .view-tabs {
@@ -57,18 +62,19 @@ button {
   bottom: max(10px, env(safe-area-inset-bottom));
   left: auto;
   z-index: 20;
-  width: min(calc(100% - 24px), 700px);
+  width: min(calc(100% - 24px), 680px);
   transform: translateX(50%);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 2px;
+  gap: 3px;
   margin: 0;
-  padding: 4px;
-  border: 1px solid rgba(227, 230, 225, 0.96);
+  padding: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 10px 24px rgba(31, 39, 36, 0.1);
-  backdrop-filter: blur(18px);
+  background: rgba(246, 247, 251, 0.76);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.16);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  backdrop-filter: blur(24px) saturate(1.6);
 }
 
 .view-tab {
@@ -85,9 +91,9 @@ button {
 }
 
 .view-tab.active {
-  background: var(--green);
-  color: #fff;
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.1);
 }
 
 .view-panel[hidden] {
@@ -99,13 +105,18 @@ button {
 .records-panel,
 .data-panel {
   background: var(--panel);
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255, 255, 255, 0.68);
   border-radius: 8px;
   box-shadow: var(--soft-shadow);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  backdrop-filter: blur(28px) saturate(1.5);
 }
 
 .today-panel {
   padding: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.56)),
+    var(--panel);
 }
 
 .topbar,
@@ -119,7 +130,7 @@ button {
 
 .eyebrow {
   margin: 0 0 6px;
-  color: var(--muted);
+  color: rgba(110, 110, 115, 0.88);
   font-size: 12px;
   font-weight: 700;
 }
@@ -131,8 +142,8 @@ p {
 }
 
 h1 {
-  font-size: 30px;
-  line-height: 1.12;
+  font-size: 32px;
+  line-height: 1.08;
   letter-spacing: 0;
 }
 
@@ -141,11 +152,13 @@ h1 {
   height: 40px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
-  color: var(--green);
+  background: var(--glass-strong);
+  color: var(--ink);
   font-size: 16px;
   font-weight: 750;
-  box-shadow: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 }
 
 .icon-button.small {
@@ -157,19 +170,24 @@ h1 {
 .recommendation {
   position: relative;
   overflow: hidden;
-  margin-top: 20px;
-  padding: 16px 0 2px;
-  border-radius: 0;
-  background: transparent;
+  margin-top: 18px;
+  padding: 17px;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(236, 245, 255, 0.72)),
+    var(--glass);
   color: var(--ink);
-  min-height: 160px;
+  min-height: 196px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 16px;
-  box-shadow: none;
-  border-top: 1px solid var(--line);
-  border-bottom: 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.76),
+    0 16px 36px rgba(0, 122, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(20px) saturate(1.35);
+  backdrop-filter: blur(20px) saturate(1.35);
 }
 
 .recommendation > * {
@@ -181,15 +199,15 @@ h1 {
   max-width: 100%;
   padding: 5px 9px;
   border-radius: 999px;
-  background: var(--wash);
-  color: var(--green-2);
+  background: rgba(0, 122, 255, 0.1);
+  color: #0066cc;
   font-size: 12px;
   font-weight: 750;
 }
 
 .recommendation h2 {
-  font-size: 29px;
-  line-height: 1.22;
+  font-size: 32px;
+  line-height: 1.12;
   letter-spacing: 0;
   word-break: keep-all;
   overflow-wrap: anywhere;
@@ -205,7 +223,7 @@ h1 {
   min-height: 34px;
   padding: 8px 10px;
   border-radius: 999px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(60, 60, 67, 0.14);
   font-size: 14px;
   font-weight: 750;
   line-height: 1.2;
@@ -213,18 +231,21 @@ h1 {
 }
 
 .dish-chip {
-  background: #fff;
-  color: var(--green);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
 }
 
 .dish-button.repeated {
   border-color: var(--coral);
-  background: #fff3ec;
+  background: rgba(255, 69, 58, 0.1);
   color: var(--coral);
 }
 
 .dish-chip.repeated {
-  background: rgba(255, 243, 236, 0.95);
+  background: rgba(255, 69, 58, 0.12);
 }
 
 .dish-button.repeated::after {
@@ -240,7 +261,7 @@ h1 {
   max-width: 100%;
   padding: 6px 9px;
   border-radius: 999px;
-  background: #fff5f1;
+  background: rgba(255, 69, 58, 0.1);
   color: var(--coral);
   font-size: 13px;
   font-weight: 800;
@@ -255,7 +276,7 @@ h1 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 12px;
 }
 
 .primary-button,
@@ -265,24 +286,29 @@ h1 {
   border: 0;
   border-radius: 8px;
   font-weight: 750;
-  box-shadow: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .primary-button {
   background: var(--green);
   color: #fff;
+  box-shadow: 0 10px 22px rgba(0, 122, 255, 0.28);
 }
 
 .secondary-button {
-  background: var(--wash);
-  color: var(--green);
-  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--ink);
+  border: 1px solid rgba(60, 60, 67, 0.12);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
 }
 
 .ghost-button {
-  background: #fff;
-  color: var(--green);
-  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.42);
+  color: var(--green-2);
+  border: 1px solid rgba(60, 60, 67, 0.12);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
 }
 
 .date-row {
@@ -291,9 +317,9 @@ h1 {
   gap: 12px;
   margin-top: 14px;
   padding: 9px 11px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(60, 60, 67, 0.12);
   border-radius: 8px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.62);
   color: var(--muted);
   font-size: 14px;
 }
@@ -355,10 +381,10 @@ h1 {
 .filter-row input {
   min-height: 44px;
   width: 100%;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(60, 60, 67, 0.12);
   border-radius: 8px;
   padding: 0 12px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.68);
   color: var(--ink);
 }
 
@@ -367,10 +393,10 @@ h1 {
   gap: 7px;
   margin-top: 14px;
   padding: 12px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(60, 60, 67, 0.12);
   border-left: 3px solid var(--green);
   border-radius: 8px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.62);
 }
 
 .selected-date,
@@ -397,9 +423,9 @@ h1 {
 .selected-dish-button,
 .year-dish-button,
 .week-dish-button {
-  background: #fff;
-  color: var(--green);
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
 }
 
 .year-calendar,
@@ -411,7 +437,7 @@ h1 {
 
 .month-block,
 .catalog-category {
-  border-top: 1px solid var(--line);
+  border-top: 1px solid rgba(60, 60, 67, 0.12);
   padding-top: 11px;
 }
 
@@ -434,7 +460,7 @@ h1 {
   gap: 10px;
   width: 100%;
   min-height: 52px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid rgba(60, 60, 67, 0.1);
   color: var(--ink);
   padding: 9px 0;
   text-align: left;
@@ -461,7 +487,7 @@ h1 {
 .repeat-tag {
   justify-self: end;
   border-radius: 999px;
-  background: #fff5f1;
+  background: rgba(255, 69, 58, 0.1);
   color: var(--coral);
   padding: 5px 8px;
   font-size: 12px;
@@ -484,10 +510,10 @@ h1 {
 .catalog-editor input {
   min-height: 44px;
   width: 100%;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(60, 60, 67, 0.12);
   border-radius: 8px;
   padding: 0 12px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.68);
   color: var(--ink);
 }
 
@@ -501,7 +527,7 @@ h1 {
   margin-top: 10px;
   padding: 9px 10px;
   border-radius: 8px;
-  background: #fff5f1;
+  background: rgba(255, 69, 58, 0.1);
   color: var(--coral);
   font-size: 13px;
   font-weight: 750;
@@ -525,10 +551,12 @@ h1 {
 .catalog-dish {
   min-height: 34px;
   padding: 7px 10px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(60, 60, 67, 0.12);
   border-radius: 999px;
-  background: #fff;
-  color: var(--green);
+  background: rgba(255, 255, 255, 0.66);
+  color: var(--ink);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
   font-size: 14px;
   font-weight: 750;
   line-height: 1.2;
@@ -540,17 +568,17 @@ h1 {
 
 .catalog-dish.selected {
   border-color: var(--coral);
-  background: #fff5f1;
+  background: rgba(255, 69, 58, 0.1);
   color: var(--coral);
   font-weight: 800;
 }
 
 .delete-dish-button {
   min-width: 32px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(60, 60, 67, 0.12);
   border-left: 0;
   border-radius: 0 999px 999px 0;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.66);
   color: var(--muted);
   font-size: 16px;
   font-weight: 900;
@@ -572,7 +600,7 @@ h1 {
   display: grid;
   gap: 8px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid rgba(60, 60, 67, 0.1);
 }
 
 .record-item:last-child {
@@ -592,16 +620,16 @@ h1 {
 }
 
 .record-dish-button {
-  background: #fff;
-  color: var(--green);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--ink);
 }
 
 .record-note {
   width: 100%;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(60, 60, 67, 0.12);
   border-radius: 8px;
   padding: 9px 10px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.68);
   color: var(--ink);
   line-height: 1.45;
   resize: vertical;
@@ -623,7 +651,7 @@ h1 {
   grid-template-columns: 86px 1fr;
   gap: 10px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid rgba(60, 60, 67, 0.1);
 }
 
 .week-item:last-child {
