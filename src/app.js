@@ -48,6 +48,8 @@
   const yearCalendar = document.querySelector("#yearCalendar");
   const yearCount = document.querySelector("#yearCount");
   const catalogSearchInput = document.querySelector("#catalogSearchInput");
+  const catalogEditor = document.querySelector("#catalogEditor");
+  const catalogEditButton = document.querySelector("#catalogEditButton");
   const customDishInput = document.querySelector("#customDishInput");
   const addDishButton = document.querySelector("#addDishButton");
   const catalogHint = document.querySelector("#catalogHint");
@@ -64,6 +66,7 @@
     currentPlan: null,
     selectedDish: "",
     replacementTarget: null,
+    catalogEditing: false,
     mealRecords: loadMealRecords(),
     customDishes: catalogState.customDishes,
     deletedDishes: catalogState.deletedDishes,
@@ -252,6 +255,7 @@
 
   function openDishInCatalog(dish, date = state.selectedDate, sourceView = state.activeView, dishIndex) {
     state.selectedDish = dish;
+    state.catalogEditing = false;
     state.replacementTarget = {
       date,
       dish,
@@ -367,6 +371,9 @@
     const categories = searchDishPool(getCatalogPool(), catalogSearchInput.value);
     const total = categories.reduce((sum, category) => sum + category.dishes.length, 0);
     catalogCount.textContent = `${total} 道`;
+    catalogEditButton.textContent = state.catalogEditing ? "完成" : "编辑";
+    catalogEditButton.setAttribute("aria-pressed", String(state.catalogEditing));
+    catalogEditor.hidden = !state.catalogEditing;
     if (state.replacementTarget) {
       catalogHint.hidden = false;
       const dishPosition =
@@ -400,18 +407,21 @@
       ...dishes.map((dish) => {
         const item = document.createElement("span");
         item.className = "catalog-dish-item";
+        item.classList.toggle("editing", state.catalogEditing);
 
         const chip = createTextElement("button", "catalog-dish", dish);
         chip.type = "button";
         chip.dataset.dish = dish;
         chip.classList.toggle("selected", isSelectedDish(dish, state.selectedDish));
 
-        const deleteButton = createTextElement("button", "delete-dish-button", "×");
-        deleteButton.type = "button";
-        deleteButton.dataset.dish = dish;
-        deleteButton.setAttribute("aria-label", `删除 ${dish}`);
-
-        item.append(chip, deleteButton);
+        item.append(chip);
+        if (state.catalogEditing) {
+          const deleteButton = createTextElement("button", "delete-dish-button", "×");
+          deleteButton.type = "button";
+          deleteButton.dataset.dish = dish;
+          deleteButton.setAttribute("aria-label", `删除 ${dish}`);
+          item.append(deleteButton);
+        }
         return item;
       }),
     );
@@ -664,6 +674,13 @@
     if (dishButton) {
       replaceTargetDish(dishButton.dataset.dish);
     }
+  });
+
+  catalogEditButton.addEventListener("click", () => {
+    state.catalogEditing = !state.catalogEditing;
+    state.replacementTarget = null;
+    state.selectedDish = "";
+    renderCatalog();
   });
 
   addDishButton.addEventListener("click", addCustomDishFromInput);

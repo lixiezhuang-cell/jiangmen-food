@@ -438,7 +438,7 @@
 
   function getWeekPlans(value, plan) {
     const start = new Date(`${normalizeTo2026(value)}T00:00:00`);
-    return Array.from({ length: 7 }, (_, index) => {
+    return Array.from({ length: 10 }, (_, index) => {
       const date = new Date(start.getTime() + index * MS_PER_DAY);
       return getPlanForDate(formatDate(date), plan);
     });

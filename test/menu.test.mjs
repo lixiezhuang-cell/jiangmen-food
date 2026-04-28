@@ -273,10 +273,10 @@ test("reassigned plans avoid same-family dish stacks across repeated shuffles", 
   }
 });
 
-test("week plans returns a seven-day window starting from the selected date", () => {
+test("week plans returns a ten-day window starting from the selected date", () => {
   const week = getWeekPlans("2026-02-26", MENU_PLAN);
 
-  assert.equal(week.length, 7);
+  assert.equal(week.length, 10);
   assert.deepEqual(
     week.map((item) => item.date),
     [
@@ -287,6 +287,9 @@ test("week plans returns a seven-day window starting from the selected date", ()
       "2026-03-02",
       "2026-03-03",
       "2026-03-04",
+      "2026-03-05",
+      "2026-03-06",
+      "2026-03-07",
     ],
   );
 });

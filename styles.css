@@ -51,23 +51,27 @@ button {
 .app-shell {
   width: min(100%, 780px);
   margin: 0 auto;
-  padding: max(14px, env(safe-area-inset-top)) 14px 30px;
+  padding: max(14px, env(safe-area-inset-top)) 14px calc(94px + env(safe-area-inset-bottom));
 }
 
 .view-tabs {
-  position: sticky;
-  top: 8px;
+  position: fixed;
+  right: 50%;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  left: auto;
   z-index: 20;
+  width: min(calc(100% - 24px), 740px);
+  transform: translateX(50%);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 5px;
-  margin-bottom: 14px;
+  margin: 0;
   padding: 5px;
   border: 1px solid rgba(225, 217, 202, 0.92);
   border-radius: 8px;
-  background: rgba(255, 253, 248, 0.88);
-  box-shadow: var(--soft-shadow);
-  backdrop-filter: blur(14px);
+  background: rgba(255, 253, 248, 0.94);
+  box-shadow: 0 16px 36px rgba(23, 33, 32, 0.16);
+  backdrop-filter: blur(16px);
 }
 
 .view-tab {
@@ -328,6 +332,18 @@ h1 {
   letter-spacing: 0;
 }
 
+.catalog-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-button {
+  min-height: 34px;
+  padding: 0 12px;
+  box-shadow: none;
+}
+
 #toast {
   min-height: 20px;
   color: var(--coral);
@@ -471,6 +487,10 @@ h1 {
   margin-top: 10px;
 }
 
+.catalog-editor[hidden] {
+  display: none;
+}
+
 .catalog-editor input {
   min-height: 44px;
   width: 100%;
@@ -516,12 +536,16 @@ h1 {
   min-height: 34px;
   padding: 7px 10px;
   border: 1px solid var(--line);
-  border-radius: 999px 0 0 999px;
+  border-radius: 999px;
   background: #fff;
   color: var(--green);
   font-size: 14px;
   font-weight: 850;
   line-height: 1.2;
+}
+
+.catalog-dish-item.editing .catalog-dish {
+  border-radius: 999px 0 0 999px;
 }
 
 .catalog-dish.selected {
@@ -714,7 +738,8 @@ button:active {
 
   .view-tabs {
     gap: 6px;
-    top: 6px;
+    width: calc(100% - 20px);
+    bottom: max(8px, env(safe-area-inset-bottom));
   }
 
   .view-tab {

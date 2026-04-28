@@ -48,7 +48,7 @@
 
         <section class="week-panel" aria-labelledby="week-title">
           <div class="section-header">
-            <h2 id="week-title">本周菜单</h2>
+            <h2 id="week-title">未来 10 天</h2>
             <span id="toast" role="status"></span>
           </div>
           <div class="week-list" id="weekList"></div>
@@ -80,12 +80,15 @@
       <section class="view-panel data-panel" id="catalogView" data-view-panel="catalog" hidden>
         <div class="section-header">
           <h2>总菜谱</h2>
-          <span id="catalogCount"></span>
+          <div class="catalog-head-actions">
+            <span id="catalogCount"></span>
+            <button class="ghost-button compact-button" id="catalogEditButton" type="button" aria-pressed="false">编辑</button>
+          </div>
         </div>
         <div class="filter-row single">
           <input id="catalogSearchInput" type="search" placeholder="搜索菜名" />
         </div>
-        <div class="catalog-editor">
+        <div class="catalog-editor" id="catalogEditor" hidden>
           <input id="customDishInput" type="text" placeholder="新增菜名" />
           <button class="secondary-button" id="addDishButton" type="button">添加</button>
         </div>
