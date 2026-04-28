@@ -27,8 +27,14 @@
   const RECORDS_STORAGE_KEY = "jiangmen-food-records";
   const CATALOG_STORAGE_KEY = "jiangmen-food-catalog";
 
-  const viewButtons = document.querySelectorAll(".view-tab");
-  const viewPanels = document.querySelectorAll("[data-view-panel]");
+  const dockButtons = document.querySelectorAll(".dock-button[data-view]");
+  const quickSheetButtons = document.querySelectorAll("[data-open-sheet]");
+  const sheetPanels = document.querySelectorAll("[data-sheet-panel]");
+  const sheetOverlay = document.querySelector("#sheetOverlay");
+  const appSheet = document.querySelector("#appSheet");
+  const sheetCloseButton = document.querySelector("#sheetCloseButton");
+  const sheetTitle = document.querySelector("#sheetTitle");
+  const sheetEyebrow = document.querySelector("#sheetEyebrow");
   const dateLabel = document.querySelector("#dateLabel");
   const styleLabel = document.querySelector("#styleLabel");
   const recommendation = document.querySelector(".recommendation");
@@ -41,7 +47,7 @@
   const toast = document.querySelector("#toast");
   const datePicker = document.querySelector("#datePicker");
   const copyButton = document.querySelector("#copyButton");
-  const shuffleButton = document.querySelector("#shuffleButton");
+  const shuffleButton = document.querySelector("#dockShuffleButton");
   const recordButton = document.querySelector("#recordButton");
   const todayButton = document.querySelector("#todayButton");
   const ruleButton = document.querySelector("#ruleButton");
@@ -61,6 +67,14 @@
   const catalogCount = document.querySelector("#catalogCount");
   const recordList = document.querySelector("#recordList");
   const recordCount = document.querySelector("#recordCount");
+
+  const SHEET_TITLES = {
+    week: { eyebrow: "排期", title: "未来 10 天" },
+    year: { eyebrow: "全年菜单", title: "日历和搜索" },
+    records: { eyebrow: "已吃记录", title: "日期记录表" },
+    catalog: { eyebrow: "菜谱库", title: "总菜谱" },
+    more: { eyebrow: "更多操作", title: "控制中心" },
+  };
 
   const catalogState = loadCatalogState();
   const state = {
@@ -264,21 +278,16 @@
     render(getPlanForDate(date, getEffectivePlan()));
   }
 
-  function setView(viewName) {
-    state.activeView = viewName;
-    if (viewName !== "catalog") {
-      state.replacementTarget = null;
-    }
-
-    viewButtons.forEach((button) => {
-      button.classList.toggle("active", button.dataset.view === viewName);
+  function updateDockState(viewName) {
+    dockButtons.forEach((button) => {
+      const isActive =
+        button.dataset.view === viewName ||
+        ((viewName === "week" || viewName === "year") && button.dataset.view === "more");
+      button.classList.toggle("active", isActive);
     });
-    viewPanels.forEach((panel) => {
-      const isActive = panel.dataset.viewPanel === viewName;
-      panel.classList.toggle("active", isActive);
-      panel.hidden = !isActive;
-    });
+  }
 
+  function renderSheetContent(viewName) {
     if (viewName === "year") {
       renderYearCalendar();
     }
@@ -288,6 +297,64 @@
     if (viewName === "records") {
       renderRecords();
     }
+    if (viewName === "week") {
+      const plan = state.currentPlan ?? getPlanForDate(state.selectedDate, getEffectivePlan());
+      renderWeek(state.selectedDate, getPreviewPlan(plan));
+    }
+  }
+
+  function openSheet(viewName) {
+    const sheetCopy = SHEET_TITLES[viewName] ?? SHEET_TITLES.more;
+    state.activeView = viewName;
+    window.clearTimeout(closeSheet.timer);
+    sheetEyebrow.textContent = sheetCopy.eyebrow;
+    sheetTitle.textContent = sheetCopy.title;
+    sheetPanels.forEach((panel) => {
+      const isActive = panel.dataset.sheetPanel === viewName;
+      panel.hidden = !isActive;
+      panel.classList.toggle("active", isActive);
+    });
+    renderSheetContent(viewName);
+    appSheet.hidden = false;
+    sheetOverlay.hidden = false;
+    document.body.classList.add("sheet-open");
+    window.requestAnimationFrame(() => {
+      appSheet.classList.add("is-open");
+      sheetOverlay.classList.add("is-open");
+    });
+    updateDockState(viewName);
+  }
+
+  function closeSheet() {
+    state.activeView = "today";
+    appSheet.classList.remove("is-open");
+    sheetOverlay.classList.remove("is-open");
+    document.body.classList.remove("sheet-open");
+    updateDockState("today");
+    window.clearTimeout(closeSheet.timer);
+    closeSheet.timer = window.setTimeout(() => {
+      if (!appSheet.classList.contains("is-open")) {
+        appSheet.hidden = true;
+        sheetOverlay.hidden = true;
+        sheetPanels.forEach((panel) => {
+          panel.hidden = true;
+          panel.classList.remove("active");
+        });
+      }
+    }, 240);
+  }
+
+  function setView(viewName) {
+    if (viewName === "today") {
+      state.replacementTarget = null;
+      closeSheet();
+      return;
+    }
+
+    if (viewName !== "catalog") {
+      state.replacementTarget = null;
+    }
+    openSheet(viewName);
   }
 
   function openDishInCatalog(dish, date = state.selectedDate, sourceView = state.activeView, dishIndex) {
@@ -625,10 +692,39 @@
     showToast("已删除");
   }
 
-  viewButtons.forEach((button) => {
+  function animateRecommendationChange() {
+    recommendation.classList.remove("is-changing");
+    void recommendation.offsetWidth;
+    recommendation.classList.add("is-changing");
+  }
+
+  dockButtons.forEach((button) => {
     button.addEventListener("click", () => {
       setView(button.dataset.view);
     });
+  });
+
+  quickSheetButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setView(button.dataset.openSheet);
+    });
+  });
+
+  sheetOverlay.addEventListener("click", closeSheet);
+  sheetCloseButton.addEventListener("click", closeSheet);
+
+  appSheet.addEventListener("click", (event) => {
+    const target = event.target.closest("[data-sheet-target]");
+    if (!target) {
+      return;
+    }
+    setView(target.dataset.sheetTarget);
+  });
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !appSheet.hidden) {
+      closeSheet();
+    }
   });
 
   copyButton.addEventListener("click", copyCurrentPlan);
@@ -647,6 +743,10 @@
     const plan = getSmartReassignedPlan(state.selectedDate, getEffectivePlan(), state.reassignOffset, state.mealRecords);
     state.reassignOffset += 1;
     render(plan);
+    animateRecommendationChange();
+    shuffleButton.classList.remove("is-pulsing");
+    void shuffleButton.offsetWidth;
+    shuffleButton.classList.add("is-pulsing");
   });
 
   todayButton.addEventListener("click", () => {
@@ -690,7 +790,7 @@
       return;
     }
     showSelectedDate(dishButton.dataset.date);
-    openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "today", dishButton.dataset.dishIndex);
+    openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "week", dishButton.dataset.dishIndex);
   });
 
   catalogSearchInput.addEventListener("input", () => {

@@ -9,98 +9,132 @@
   </head>
   <body>
     <main class="app-shell">
-      <nav class="view-tabs" aria-label="菜单视图">
-        <button class="view-tab active" type="button" data-view="today">今日</button>
-        <button class="view-tab" type="button" data-view="year">全年</button>
-        <button class="view-tab" type="button" data-view="records">记录</button>
-        <button class="view-tab" type="button" data-view="catalog">菜谱</button>
-      </nav>
-
-      <section class="view-panel active" id="todayView" data-view-panel="today">
-        <section class="today-panel" aria-labelledby="app-title">
-          <div class="topbar">
-            <div>
-              <p class="eyebrow" id="dateLabel">2026</p>
-              <h1 id="app-title">今晚吃什么</h1>
-            </div>
-            <button class="icon-button" id="ruleButton" type="button" aria-label="忌口规则">!</button>
+      <section class="today-panel" id="todayView" aria-labelledby="app-title">
+        <div class="topbar">
+          <div>
+            <p class="eyebrow" id="dateLabel">2026</p>
+            <h1 id="app-title">今晚吃什么</h1>
           </div>
+          <button class="icon-button" id="ruleButton" type="button" aria-label="忌口规则">!</button>
+        </div>
 
-          <article class="recommendation" aria-live="polite">
-            <div class="recommendation-head">
-              <div class="style-pill" id="styleLabel">江门广式</div>
-              <span class="smart-badge">Smart Pick</span>
-            </div>
-            <h2 id="comboTitle">加载中</h2>
-            <p class="recommend-reason" id="recommendReason"></p>
-            <div class="insight-grid" id="insightGrid"></div>
-            <div class="duplicate-note" id="duplicateNote" hidden></div>
-            <div class="dish-list" id="dishList"></div>
-          </article>
-
-          <div class="actions">
-            <button class="primary-button" id="copyButton" type="button">复制</button>
-            <button class="secondary-button" id="shuffleButton" type="button">换一个</button>
-            <button class="secondary-button" id="recordButton" type="button">记录</button>
-            <button class="ghost-button" id="todayButton" type="button">今天</button>
+        <article class="recommendation" aria-live="polite">
+          <div class="recommendation-head">
+            <div class="style-pill" id="styleLabel">江门广式</div>
+            <span class="smart-badge">Smart Pick</span>
           </div>
+          <h2 id="comboTitle">加载中</h2>
+          <p class="recommend-reason" id="recommendReason"></p>
+          <div class="insight-grid" id="insightGrid"></div>
+          <div class="duplicate-note" id="duplicateNote" hidden></div>
+          <div class="dish-list" id="dishList"></div>
+        </article>
 
-          <div class="date-row">
-            <label for="datePicker">查日期</label>
-            <input id="datePicker" type="date" min="2026-01-01" max="2026-12-31" />
-          </div>
-        </section>
+        <div class="actions">
+          <button class="primary-button" id="copyButton" type="button">复制</button>
+          <button class="secondary-button" id="recordButton" type="button">记录</button>
+          <button class="secondary-button" type="button" data-open-sheet="week">未来10天</button>
+          <button class="ghost-button" type="button" data-open-sheet="more">更多</button>
+        </div>
 
-        <section class="week-panel" aria-labelledby="week-title">
+        <div class="date-row">
+          <label for="datePicker">查日期</label>
+          <input id="datePicker" type="date" min="2026-01-01" max="2026-12-31" />
+        </div>
+
+        <span class="toast-pill" id="toast" role="status"></span>
+      </section>
+    </main>
+
+    <div class="sheet-overlay" id="sheetOverlay" hidden></div>
+    <section class="app-sheet" id="appSheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+      <div class="sheet-grabber" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <div>
+          <p class="sheet-eyebrow" id="sheetEyebrow">今晚吃什么</p>
+          <h2 id="sheetTitle">详情</h2>
+        </div>
+        <button class="icon-button small" id="sheetCloseButton" type="button" aria-label="关闭">×</button>
+      </div>
+
+      <div class="sheet-body">
+        <section class="sheet-panel week-panel" id="weekView" data-sheet-panel="week" hidden>
           <div class="section-header">
             <h2 id="week-title">未来 10 天</h2>
-            <span id="toast" role="status"></span>
           </div>
           <div class="week-list" id="weekList"></div>
         </section>
 
-      </section>
-
-      <section class="view-panel data-panel" id="yearView" data-view-panel="year" hidden>
-        <div class="section-header">
-          <h2>全年日历</h2>
-          <span id="yearCount"></span>
-        </div>
-        <div class="filter-row">
-          <input id="yearDatePicker" type="date" min="2026-01-01" max="2026-12-31" />
-          <input id="yearSearchInput" type="search" placeholder="搜索日期 / 菜名 / 风格" />
-        </div>
-        <article class="selected-day" id="yearSelected"></article>
-        <div class="year-calendar" id="yearCalendar"></div>
-      </section>
-
-      <section class="view-panel data-panel records-panel" id="recordsView" data-view-panel="records" hidden>
-        <div class="section-header">
-          <h2 id="records-title">日期记录表</h2>
-          <span id="recordCount"></span>
-        </div>
-        <div class="record-list" id="recordList"></div>
-      </section>
-
-      <section class="view-panel data-panel" id="catalogView" data-view-panel="catalog" hidden>
-        <div class="section-header">
-          <h2>总菜谱</h2>
-          <div class="catalog-head-actions">
-            <span id="catalogCount"></span>
-            <button class="ghost-button compact-button" id="catalogEditButton" type="button" aria-pressed="false">编辑</button>
+        <section class="sheet-panel data-panel" id="yearView" data-sheet-panel="year" hidden>
+          <div class="section-header">
+            <h2>全年日历</h2>
+            <span id="yearCount"></span>
           </div>
-        </div>
-        <div class="filter-row single">
-          <input id="catalogSearchInput" type="search" placeholder="搜索菜名" />
-        </div>
-        <div class="catalog-editor" id="catalogEditor" hidden>
-          <input id="customDishInput" type="text" placeholder="新增菜名" />
-          <button class="secondary-button" id="addDishButton" type="button">添加</button>
-        </div>
-        <div class="catalog-hint" id="catalogHint"></div>
-        <div class="catalog-list" id="catalogList"></div>
-      </section>
-    </main>
+          <div class="filter-row">
+            <input id="yearDatePicker" type="date" min="2026-01-01" max="2026-12-31" />
+            <input id="yearSearchInput" type="search" placeholder="搜索日期 / 菜名 / 风格" />
+          </div>
+          <article class="selected-day" id="yearSelected"></article>
+          <div class="year-calendar" id="yearCalendar"></div>
+        </section>
+
+        <section class="sheet-panel data-panel records-panel" id="recordsView" data-sheet-panel="records" hidden>
+          <div class="section-header">
+            <h2 id="records-title">日期记录表</h2>
+            <span id="recordCount"></span>
+          </div>
+          <div class="record-list" id="recordList"></div>
+        </section>
+
+        <section class="sheet-panel data-panel" id="catalogView" data-sheet-panel="catalog" hidden>
+          <div class="section-header">
+            <h2>总菜谱</h2>
+            <div class="catalog-head-actions">
+              <span id="catalogCount"></span>
+              <button class="ghost-button compact-button" id="catalogEditButton" type="button" aria-pressed="false">编辑</button>
+            </div>
+          </div>
+          <div class="filter-row single">
+            <input id="catalogSearchInput" type="search" placeholder="搜索菜名" />
+          </div>
+          <div class="catalog-editor" id="catalogEditor" hidden>
+            <input id="customDishInput" type="text" placeholder="新增菜名" />
+            <button class="secondary-button" id="addDishButton" type="button">添加</button>
+          </div>
+          <div class="catalog-hint" id="catalogHint"></div>
+          <div class="catalog-list" id="catalogList"></div>
+        </section>
+
+        <section class="sheet-panel more-panel" id="moreView" data-sheet-panel="more" hidden>
+          <div class="more-grid">
+            <button class="more-card" type="button" data-sheet-target="week">
+              <span>未来 10 天</span>
+              <strong>看接下来吃什么</strong>
+            </button>
+            <button class="more-card" type="button" data-sheet-target="year">
+              <span>全年日历</span>
+              <strong>按日期和菜名搜索</strong>
+            </button>
+            <button class="more-card" type="button" data-sheet-target="records">
+              <span>日期记录</span>
+              <strong>改备注和已吃菜</strong>
+            </button>
+            <button class="more-card" type="button" data-sheet-target="catalog">
+              <span>总菜谱</span>
+              <strong>添加、删除、替换菜</strong>
+            </button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <nav class="dock-nav" aria-label="底部操作">
+      <button class="dock-button active" id="todayButton" type="button" data-view="today">今日</button>
+      <button class="dock-button" type="button" data-view="catalog">菜谱</button>
+      <button class="dock-fab" id="dockShuffleButton" type="button">换一个</button>
+      <button class="dock-button" type="button" data-view="records">记录</button>
+      <button class="dock-button" type="button" data-view="more">更多</button>
+    </nav>
 
     <dialog id="ruleDialog" class="rule-dialog">
       <form method="dialog">
