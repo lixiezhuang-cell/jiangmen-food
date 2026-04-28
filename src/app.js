@@ -103,8 +103,8 @@
     duplicateNote.hidden = repeatedDishes.length === 0;
     duplicateNote.textContent = repeatedDishes.length ? `已重复：${repeatedDishes.join("、")}` : "";
     dishList.replaceChildren(
-      ...plan.dishes.map((dish) => {
-        const chip = createDishButton(dish, "dish-chip", plan.date);
+      ...plan.dishes.map((dish, dishIndex) => {
+        const chip = createDishButton(dish, "dish-chip", plan.date, dishIndex);
         chip.classList.toggle("repeated", repeatedDishes.includes(dish));
         return chip;
       }),
@@ -132,8 +132,8 @@
         combo.className = "week-dishes";
         const repeatedDishes = getDuplicateDishes(item.date, duplicateMap);
         combo.replaceChildren(
-          ...item.dishes.map((dish) => {
-            const chip = createDishButton(dish, "week-dish-button", item.date);
+          ...item.dishes.map((dish, dishIndex) => {
+            const chip = createDishButton(dish, "week-dish-button", item.date, dishIndex);
             chip.classList.toggle("repeated", repeatedDishes.includes(dish));
             return chip;
           }),
@@ -250,11 +250,12 @@
     }
   }
 
-  function openDishInCatalog(dish, date = state.selectedDate, sourceView = state.activeView) {
+  function openDishInCatalog(dish, date = state.selectedDate, sourceView = state.activeView, dishIndex) {
     state.selectedDish = dish;
     state.replacementTarget = {
       date,
       dish,
+      dishIndex: Number.isInteger(Number(dishIndex)) ? Number(dishIndex) : undefined,
       plan: getReplacementSourcePlan(date, sourceView),
       sourceView,
     };
@@ -282,8 +283,8 @@
     const dishButtons = document.createElement("div");
     dishButtons.className = "selected-dish-list";
     dishButtons.replaceChildren(
-      ...plan.dishes.map((dish) => {
-        const chip = createDishButton(dish, "selected-dish-button", plan.date);
+      ...plan.dishes.map((dish, dishIndex) => {
+        const chip = createDishButton(dish, "selected-dish-button", plan.date, dishIndex);
         chip.classList.toggle("repeated", repeatedDishes.includes(dish));
         return chip;
       }),
@@ -347,8 +348,8 @@
     const dishes = document.createElement("div");
     dishes.className = "year-day-dishes";
     dishes.replaceChildren(
-      ...item.dishes.map((dish) => {
-        const chip = createDishButton(dish, "year-dish-button", item.date);
+      ...item.dishes.map((dish, dishIndex) => {
+        const chip = createDishButton(dish, "year-dish-button", item.date, dishIndex);
         chip.classList.toggle("repeated", repeatedDishes.includes(dish));
         return chip;
       }),
@@ -368,7 +369,9 @@
     catalogCount.textContent = `${total} 道`;
     if (state.replacementTarget) {
       catalogHint.hidden = false;
-      catalogHint.textContent = `正在替换：${state.replacementTarget.dish}。点一个菜名即可更新。`;
+      const dishPosition =
+        Number.isInteger(state.replacementTarget.dishIndex) ? `第 ${state.replacementTarget.dishIndex + 1} 个` : "";
+      catalogHint.textContent = `正在替换${dishPosition}：${state.replacementTarget.dish}。点一个菜名即可更新。`;
     } else {
       catalogHint.hidden = true;
       catalogHint.textContent = "";
@@ -424,13 +427,16 @@
     return element;
   }
 
-  function createDishButton(dish, className, date) {
+  function createDishButton(dish, className, date, dishIndex) {
     const button = document.createElement("button");
     button.className = `dish-button ${className}`;
     button.type = "button";
     button.dataset.dish = dish;
     if (date) {
       button.dataset.date = date;
+    }
+    if (Number.isInteger(dishIndex)) {
+      button.dataset.dishIndex = String(dishIndex);
     }
     button.textContent = dish;
     return button;
@@ -465,7 +471,9 @@
         const dishes = document.createElement("div");
         dishes.className = "record-dishes";
         dishes.replaceChildren(
-          ...comboToDishes(record.combo).map((dish) => createDishButton(dish, "record-dish-button", record.date)),
+          ...comboToDishes(record.combo).map((dish, dishIndex) =>
+            createDishButton(dish, "record-dish-button", record.date, dishIndex),
+          ),
         );
 
         const note = document.createElement("textarea");
@@ -500,7 +508,7 @@
     }
 
     const plan = target.plan ?? getPlanForDate(target.date, getEffectivePlan());
-    const replaced = replaceDishInPlanItem(plan, target.dish, newDish);
+    const replaced = replaceDishInPlanItem(plan, target.dish, newDish, target.dishIndex);
     if (replaced === plan) {
       showToast("没有找到要替换的菜");
       return;
@@ -585,7 +593,7 @@
     if (!button) {
       return;
     }
-    openDishInCatalog(button.dataset.dish, button.dataset.date, "today");
+    openDishInCatalog(button.dataset.dish, button.dataset.date, "today", button.dataset.dishIndex);
   });
 
   shuffleButton.addEventListener("click", () => {
@@ -618,14 +626,14 @@
     showSelectedDate(row.dataset.date);
     renderYearCalendar();
     if (dishButton) {
-      openDishInCatalog(dishButton.dataset.dish, row.dataset.date, "year");
+      openDishInCatalog(dishButton.dataset.dish, row.dataset.date, "year", dishButton.dataset.dishIndex);
     }
   });
 
   yearSelected.addEventListener("click", (event) => {
     const dishButton = event.target.closest(".selected-dish-button");
     if (dishButton) {
-      openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "year");
+      openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "year", dishButton.dataset.dishIndex);
     }
   });
 
@@ -635,7 +643,7 @@
       return;
     }
     showSelectedDate(dishButton.dataset.date);
-    openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "today");
+    openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "today", dishButton.dataset.dishIndex);
   });
 
   catalogSearchInput.addEventListener("input", () => {
@@ -683,7 +691,7 @@
     if (!dishButton) {
       return;
     }
-    openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "records");
+    openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "records", dishButton.dataset.dishIndex);
   });
 
   ruleButton.addEventListener("click", () => {

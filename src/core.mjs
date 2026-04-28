@@ -257,10 +257,17 @@ export function applyMealRecordsToPlan(plan, records) {
   });
 }
 
-export function replaceDishInPlanItem(item, oldDish, newDish) {
+export function replaceDishInPlanItem(item, oldDish, newDish, dishIndex) {
   const oldName = oldDish.trim();
   const newName = newDish.trim();
-  const index = item.dishes.findIndex((dish) => dish === oldName);
+  const requestedIndex = Number(dishIndex);
+  const index =
+    Number.isInteger(requestedIndex) &&
+    requestedIndex >= 0 &&
+    requestedIndex < item.dishes.length &&
+    item.dishes[requestedIndex] === oldName
+      ? requestedIndex
+      : item.dishes.findIndex((dish) => dish === oldName);
   if (index < 0 || !newName) {
     return item;
   }

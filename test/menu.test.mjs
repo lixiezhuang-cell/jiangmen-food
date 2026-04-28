@@ -131,6 +131,22 @@ test("dish replacement rewrites one dish in a plan item", () => {
   assert.equal(unchanged, plan);
 });
 
+test("dish replacement can target the selected dish position", () => {
+  const plan = {
+    date: "2026-04-29",
+    weekday: "周三",
+    combo: "腐乳通菜 + 腐乳通菜 + 沙姜鸡尖",
+    dishes: ["腐乳通菜", "腐乳通菜", "沙姜鸡尖"],
+    style: "三菜下酒",
+  };
+  const replacedSecond = replaceDishInPlanItem(plan, "腐乳通菜", "豉汁排骨", 1);
+  const replacedThird = replaceDishInPlanItem(plan, "沙姜鸡尖", "椒盐鱼骨", 2);
+
+  assert.deepEqual(replacedSecond.dishes, ["腐乳通菜", "豉汁排骨", "沙姜鸡尖"]);
+  assert.equal(replacedSecond.combo, "腐乳通菜 + 豉汁排骨 + 沙姜鸡尖");
+  assert.deepEqual(replacedThird.dishes, ["腐乳通菜", "腐乳通菜", "椒盐鱼骨"]);
+});
+
 test("custom dish pool additions and deletions are applied locally", () => {
   const added = addCustomDish([], "  五邑小炒  ");
   const deduped = addCustomDish(added, "五邑小炒");
