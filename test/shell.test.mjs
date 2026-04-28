@@ -71,3 +71,12 @@ test("page disables zoom gestures for app-like mobile use", () => {
   assert.match(appScript, /gesturestart/);
   assert.match(appScript, /event\.ctrlKey/);
 });
+
+test("replacing a future home-list dish keeps the home date in place", () => {
+  const weekHandler = appScript.match(/weekList\.addEventListener\("click"[\s\S]*?\n  \}\);/);
+
+  assert.ok(weekHandler, "week list click handler exists");
+  assert.doesNotMatch(weekHandler[0], /showSelectedDate\(dishButton\.dataset\.date\)/);
+  assert.match(appScript, /returnDate:\s*state\.selectedDate/);
+  assert.match(appScript, /state\.selectedDate\s*=\s*target\.returnDate\s*\?\?\s*replaced\.date/);
+});

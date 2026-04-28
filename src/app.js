@@ -417,6 +417,7 @@
       dish,
       dishIndex: Number.isInteger(Number(dishIndex)) ? Number(dishIndex) : undefined,
       plan: getReplacementSourcePlan(date, sourceView),
+      returnDate: state.selectedDate,
       sourceView,
     };
     catalogSearchInput.value = "";
@@ -689,7 +690,7 @@
     }
 
     state.mealRecords = upsertMealRecord(state.mealRecords, replaced);
-    state.selectedDate = replaced.date;
+    state.selectedDate = target.returnDate ?? replaced.date;
     state.selectedDish = newDish;
     const returnView = target.sourceView === "catalog" ? "today" : target.sourceView;
     state.replacementTarget = null;
@@ -861,7 +862,6 @@
     if (!dishButton) {
       return;
     }
-    showSelectedDate(dishButton.dataset.date);
     openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "today", dishButton.dataset.dishIndex);
   });
 
