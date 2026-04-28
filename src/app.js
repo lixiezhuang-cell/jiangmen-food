@@ -81,6 +81,7 @@
     currentPlan: null,
     selectedDish: "",
     replacementTarget: null,
+    catalogFeedback: "",
     catalogEditing: false,
     mealRecords: loadMealRecords(),
     customDishes: catalogState.customDishes,
@@ -355,12 +356,14 @@
   function setView(viewName) {
     if (viewName === "today") {
       state.replacementTarget = null;
+      state.catalogFeedback = "";
       closeSheet();
       return;
     }
 
     if (viewName !== "catalog") {
       state.replacementTarget = null;
+      state.catalogFeedback = "";
     }
     openSheet(viewName);
   }
@@ -368,6 +371,7 @@
   function openDishInCatalog(dish, date = state.selectedDate, sourceView = state.activeView, dishIndex) {
     state.selectedDish = dish;
     state.catalogEditing = false;
+    state.catalogFeedback = "";
     state.replacementTarget = {
       date,
       dish,
@@ -488,11 +492,14 @@
     catalogEditor.hidden = !state.catalogEditing;
     if (state.replacementTarget) {
       catalogHint.hidden = false;
+      catalogHint.classList.toggle("has-feedback", state.catalogFeedback !== "");
       const dishPosition =
         Number.isInteger(state.replacementTarget.dishIndex) ? `第 ${state.replacementTarget.dishIndex + 1} 个` : "";
-      catalogHint.textContent = `正在替换${dishPosition}：${state.replacementTarget.dish}。点一个菜名即可更新。`;
+      const baseHint = `正在替换${dishPosition}：${state.replacementTarget.dish}。点一个菜名即可更新。`;
+      catalogHint.textContent = state.catalogFeedback ? `${baseHint} ${state.catalogFeedback}` : baseHint;
     } else {
       catalogHint.hidden = true;
+      catalogHint.classList.remove("has-feedback");
       catalogHint.textContent = "";
     }
     catalogList.replaceChildren(
@@ -632,12 +639,12 @@
     const plan = target.plan ?? getPlanForDate(target.date, getEffectivePlan());
     const replaced = replaceDishInPlanItem(plan, target.dish, newDish, target.dishIndex);
     if (replaced === plan) {
-      showToast("没有找到要替换的菜");
+      showCatalogFeedback("没有找到要替换的菜");
       return;
     }
     const sameFamilies = findSameDishFamilies(replaced.dishes);
     if (sameFamilies.length) {
-      showToast(`同类了：${sameFamilies[0].dishes.join("、")}`);
+      showCatalogFeedback(`同类了：${sameFamilies[0].dishes.join("、")}`);
       return;
     }
 
@@ -646,6 +653,7 @@
     state.selectedDish = newDish;
     const returnView = target.sourceView === "catalog" ? "today" : target.sourceView;
     state.replacementTarget = null;
+    state.catalogFeedback = "";
     saveMealRecords();
     refreshFromRecords();
     setView(returnView || "today");
@@ -694,10 +702,17 @@
     }
     if (state.replacementTarget?.dish === dish) {
       state.replacementTarget = null;
+      state.catalogFeedback = "";
     }
     saveCatalogState();
     renderCatalog();
     showToast("已删除");
+  }
+
+  function showCatalogFeedback(message) {
+    state.catalogFeedback = message;
+    renderCatalog();
+    showToast(message);
   }
 
   function animateRecommendationChange() {
@@ -814,6 +829,7 @@
     if (!state.replacementTarget) {
       state.selectedDish = "";
     }
+    state.catalogFeedback = "";
     renderCatalog();
   });
 
@@ -833,6 +849,7 @@
   catalogEditButton.addEventListener("click", () => {
     state.catalogEditing = !state.catalogEditing;
     state.replacementTarget = null;
+    state.catalogFeedback = "";
     state.selectedDish = "";
     renderCatalog();
   });

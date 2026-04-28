@@ -640,12 +640,31 @@ h1 {
 }
 
 .toast-pill {
+  position: fixed;
+  right: 50%;
+  bottom: calc(92px + env(safe-area-inset-bottom));
+  z-index: 90;
   display: block;
   min-height: 20px;
-  margin-top: 10px;
+  max-width: min(360px, calc(100% - 32px));
+  padding: 0 10px;
+  transform: translateX(50%);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
   color: var(--coral);
   font-size: 13px;
   font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 14px 34px rgba(36, 41, 69, 0.12);
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(16px) saturate(1.35);
+  backdrop-filter: blur(16px) saturate(1.35);
+}
+
+.toast-pill:empty {
+  opacity: 0;
+  transform: translateX(50%) translateY(6px);
 }
 
 .filter-row {
@@ -812,6 +831,11 @@ h1 {
   color: var(--coral);
   font-size: 13px;
   font-weight: 750;
+}
+
+.catalog-hint.has-feedback {
+  border: 1px solid rgba(255, 69, 58, 0.18);
+  background: rgba(255, 69, 58, 0.14);
 }
 
 .catalog-hint[hidden] {

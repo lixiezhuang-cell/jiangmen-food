@@ -4,6 +4,7 @@ import { test } from "node:test";
 
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const css = await readFile(new URL("../styles.css", import.meta.url), "utf8");
+const appScript = await readFile(new URL("../src/app.js", import.meta.url), "utf8");
 
 test("app shell exposes a three item dock and reusable sheet panels", () => {
   assert.match(html, /class="dock-nav"/);
@@ -50,4 +51,13 @@ test("open sheets block dock interaction and keep catalog editing controls stick
   assert.match(css, /\.dock-nav\s*{[^}]*z-index:\s*60/s);
   assert.match(css, /#catalogView\s*>\s*\.section-header\s*{[^}]*position:\s*sticky/s);
   assert.match(css, /#catalogView\s*>\s*\.section-header\s*{[^}]*top:\s*0/s);
+});
+
+test("catalog replacement feedback stays visible inside the sheet", () => {
+  assert.match(appScript, /catalogFeedback/);
+  assert.match(appScript, /showCatalogFeedback/);
+  assert.match(appScript, /catalogHint\.classList\.toggle\("has-feedback"/);
+  assert.match(css, /\.catalog-hint\.has-feedback/);
+  assert.match(css, /\.toast-pill\s*{[^}]*position:\s*fixed/s);
+  assert.match(css, /\.toast-pill\s*{[^}]*z-index:\s*90/s);
 });
