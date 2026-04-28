@@ -46,7 +46,7 @@
   const toast = document.querySelector("#toast");
   const datePicker = document.querySelector("#datePicker");
   const copyButton = document.querySelector("#copyButton");
-  const shuffleButton = document.querySelector("#shuffleButton");
+  const shuffleButtons = document.querySelectorAll("[data-shuffle]");
   const recordButton = document.querySelector("#recordButton");
   const todayButton = document.querySelector("#todayButton");
   const ruleDialog = document.querySelector("#ruleDialog");
@@ -293,7 +293,7 @@
   }
 
   function updateDockState(viewName) {
-    const dockView = viewName === "records" || viewName === "today" ? viewName : "more";
+    const dockView = viewName === "today" ? "today" : "more";
     dockButtons.forEach((button) => {
       button.classList.toggle("active", button.dataset.view === dockView);
     });
@@ -706,6 +706,17 @@
     recommendation.classList.add("is-changing");
   }
 
+  function shuffleCurrentPlan(triggerButton) {
+    closeSheet();
+    const plan = getSmartReassignedPlan(state.selectedDate, getEffectivePlan(), state.reassignOffset, state.mealRecords);
+    state.reassignOffset += 1;
+    render(plan);
+    animateRecommendationChange();
+    triggerButton.classList.remove("is-pulsing");
+    void triggerButton.offsetWidth;
+    triggerButton.classList.add("is-pulsing");
+  }
+
   dockButtons.forEach((button) => {
     button.addEventListener("click", () => {
       setView(button.dataset.view);
@@ -749,14 +760,10 @@
     openDishInCatalog(button.dataset.dish, button.dataset.date, "today", button.dataset.dishIndex);
   });
 
-  shuffleButton.addEventListener("click", () => {
-    const plan = getSmartReassignedPlan(state.selectedDate, getEffectivePlan(), state.reassignOffset, state.mealRecords);
-    state.reassignOffset += 1;
-    render(plan);
-    animateRecommendationChange();
-    shuffleButton.classList.remove("is-pulsing");
-    void shuffleButton.offsetWidth;
-    shuffleButton.classList.add("is-pulsing");
+  shuffleButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      shuffleCurrentPlan(button);
+    });
   });
 
   todayButton.addEventListener("click", () => {

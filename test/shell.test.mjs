@@ -13,22 +13,24 @@ test("app shell exposes a three item dock and reusable sheet panels", () => {
   assert.match(html, /data-sheet-panel="records"/);
   assert.match(html, /data-sheet-panel="year"/);
   assert.match(html, /data-sheet-panel="more"/);
-  assert.doesNotMatch(html, /id="dockShuffleButton"/);
   assert.doesNotMatch(html, /data-sheet-panel="week"/);
   assert.doesNotMatch(html, /data-sheet-target="week"/);
   assert.match(html, /id="homeWeekPanel"/);
   assert.match(html, /id="weekList"/);
   assert.match(html, /id="shuffleButton"/);
+  assert.match(html, /id="dockShuffleButton"/);
   assert.match(html, /data-open-rules/);
   assert.doesNotMatch(html, /id="ruleButton"/);
   assert.doesNotMatch(html, /id="insightGrid"/);
 });
 
-test("dock navigation only keeps today, records, and more", () => {
+test("dock navigation only keeps today, shuffle, and more", () => {
   const dockMatch = html.match(/<nav class="dock-nav"[\s\S]*?<\/nav>/);
   assert.ok(dockMatch, "dock navigation exists");
   const labels = [...dockMatch[0].matchAll(/<button[^>]*>([^<]+)<\/button>/g)].map((match) => match[1].trim());
-  assert.deepEqual(labels, ["今日", "记录", "更多"]);
+  assert.deepEqual(labels, ["今日", "换一个", "更多"]);
+  assert.doesNotMatch(dockMatch[0], /data-view="records"/);
+  assert.match(html, /data-sheet-target="records"/);
 });
 
 test("sheet and dock have transition styles with reduced motion fallback", () => {

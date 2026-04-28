@@ -24,7 +24,7 @@
         </article>
 
         <div class="actions">
-          <button class="primary-button shuffle-button" id="shuffleButton" type="button">换一个</button>
+          <button class="primary-button shuffle-button" id="shuffleButton" type="button" data-shuffle>换一个</button>
           <button class="secondary-button" id="recordButton" type="button">记录</button>
           <button class="ghost-button" id="copyButton" type="button">复制</button>
         </div>
@@ -122,7 +122,7 @@
 
     <nav class="dock-nav" aria-label="底部操作">
       <button class="dock-button active" id="todayButton" type="button" data-view="today">今日</button>
-      <button class="dock-button" type="button" data-view="records">记录</button>
+      <button class="dock-button" id="dockShuffleButton" type="button" data-shuffle>换一个</button>
       <button class="dock-button" type="button" data-view="more">更多</button>
     </nav>
 
