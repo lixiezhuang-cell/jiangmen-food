@@ -9,39 +9,71 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="today-panel" aria-labelledby="app-title">
-        <div class="topbar">
-          <div>
-            <p class="eyebrow" id="dateLabel">2026</p>
-            <h1 id="app-title">今晚吃什么</h1>
+      <nav class="view-tabs" aria-label="菜单视图">
+        <button class="view-tab active" type="button" data-view="today">今日</button>
+        <button class="view-tab" type="button" data-view="year">全年</button>
+        <button class="view-tab" type="button" data-view="catalog">菜谱</button>
+      </nav>
+
+      <section class="view-panel active" id="todayView" data-view-panel="today">
+        <section class="today-panel" aria-labelledby="app-title">
+          <div class="topbar">
+            <div>
+              <p class="eyebrow" id="dateLabel">2026</p>
+              <h1 id="app-title">今晚吃什么</h1>
+            </div>
+            <button class="icon-button" id="ruleButton" type="button" aria-label="忌口规则">!</button>
           </div>
-          <button class="icon-button" id="ruleButton" type="button" aria-label="忌口规则">!</button>
-        </div>
 
-        <article class="recommendation" aria-live="polite">
-          <div class="style-pill" id="styleLabel">江门广式</div>
-          <h2 id="comboTitle">加载中</h2>
-          <div class="dish-list" id="dishList"></div>
-        </article>
+          <article class="recommendation" aria-live="polite">
+            <div class="style-pill" id="styleLabel">江门广式</div>
+            <h2 id="comboTitle">加载中</h2>
+            <div class="dish-list" id="dishList"></div>
+          </article>
 
-        <div class="actions">
-          <button class="primary-button" id="copyButton" type="button">复制</button>
-          <button class="secondary-button" id="shuffleButton" type="button">换一个</button>
-          <button class="ghost-button" id="todayButton" type="button">今天</button>
-        </div>
+          <div class="actions">
+            <button class="primary-button" id="copyButton" type="button">复制</button>
+            <button class="secondary-button" id="shuffleButton" type="button">换一个</button>
+            <button class="ghost-button" id="todayButton" type="button">今天</button>
+          </div>
 
-        <div class="date-row">
-          <label for="datePicker">查日期</label>
-          <input id="datePicker" type="date" min="2026-01-01" max="2026-12-31" />
-        </div>
+          <div class="date-row">
+            <label for="datePicker">查日期</label>
+            <input id="datePicker" type="date" min="2026-01-01" max="2026-12-31" />
+          </div>
+        </section>
+
+        <section class="week-panel" aria-labelledby="week-title">
+          <div class="section-header">
+            <h2 id="week-title">本周菜单</h2>
+            <span id="toast" role="status"></span>
+          </div>
+          <div class="week-list" id="weekList"></div>
+        </section>
       </section>
 
-      <section class="week-panel" aria-labelledby="week-title">
+      <section class="view-panel data-panel" id="yearView" data-view-panel="year" hidden>
         <div class="section-header">
-          <h2 id="week-title">本周菜单</h2>
-          <span id="toast" role="status"></span>
+          <h2>全年日历</h2>
+          <span id="yearCount"></span>
         </div>
-        <div class="week-list" id="weekList"></div>
+        <div class="filter-row">
+          <input id="yearDatePicker" type="date" min="2026-01-01" max="2026-12-31" />
+          <input id="yearSearchInput" type="search" placeholder="搜索日期 / 菜名 / 风格" />
+        </div>
+        <article class="selected-day" id="yearSelected"></article>
+        <div class="year-calendar" id="yearCalendar"></div>
+      </section>
+
+      <section class="view-panel data-panel" id="catalogView" data-view-panel="catalog" hidden>
+        <div class="section-header">
+          <h2>总菜谱</h2>
+          <span id="catalogCount"></span>
+        </div>
+        <div class="filter-row single">
+          <input id="catalogSearchInput" type="search" placeholder="搜索菜名" />
+        </div>
+        <div class="catalog-list" id="catalogList"></div>
       </section>
     </main>
 
@@ -54,8 +86,8 @@
         <ul>
           <li>无饭，粉面粥只偶尔出现。</li>
           <li>避开鹅翼、鹅肠、鸭掌、海带结、鸭胗和指定点心。</li>
-          <li>避开虾蟹和不适小海鲜；鱿鱼、田螺、鱼、黄沙蚬可以。</li>
-          <li>二人搭配，10 天内同一道菜不重复。</li>
+          <li>避开虾蟹和不适小海鲜；鱿鱼、田螺、鱼、黄沙蚬、青口可以。</li>
+          <li>二人搭配，10 天内同一道菜不重复，同一顿不叠同类食材。</li>
         </ul>
       </form>
     </dialog>
