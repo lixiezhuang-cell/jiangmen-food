@@ -146,7 +146,7 @@ body.sheet-open {
 .sheet-overlay {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 70;
   background: rgba(15, 23, 42, 0.18);
   opacity: 0;
   pointer-events: none;
@@ -162,7 +162,7 @@ body.sheet-open {
   position: fixed;
   right: 50%;
   bottom: 0;
-  z-index: 50;
+  z-index: 80;
   display: flex;
   flex-direction: column;
   width: min(100%, 760px);
@@ -221,7 +221,7 @@ body.sheet-open {
 .sheet-body {
   min-height: 0;
   overflow: auto;
-  padding: 14px 16px calc(112px + env(safe-area-inset-bottom));
+  padding: 14px 16px calc(34px + env(safe-area-inset-bottom));
 }
 
 .sheet-panel[hidden],
@@ -263,6 +263,18 @@ body.sheet-open {
   height: 1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
+}
+
+#catalogView > .section-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 6px 0 10px;
+  background:
+    linear-gradient(180deg, rgba(250, 252, 255, 0.96), rgba(250, 252, 255, 0.84)),
+    var(--glass-strong);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  backdrop-filter: blur(18px) saturate(1.35);
 }
 
 .more-grid {
@@ -543,13 +555,6 @@ h1 {
   box-shadow: 0 12px 24px rgba(21, 21, 26, 0.2);
 }
 
-.shuffle-button {
-  background: linear-gradient(135deg, var(--mint), var(--cyan));
-  color: #061a17;
-  box-shadow: 0 12px 24px rgba(0, 199, 190, 0.22);
-}
-
-.shuffle-button.is-pulsing,
 .dock-shuffle-button.is-pulsing {
   animation: fabPulse 0.42s ease;
 }

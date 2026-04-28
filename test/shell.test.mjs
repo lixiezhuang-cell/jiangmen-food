@@ -17,7 +17,7 @@ test("app shell exposes a three item dock and reusable sheet panels", () => {
   assert.doesNotMatch(html, /data-sheet-target="week"/);
   assert.match(html, /id="homeWeekPanel"/);
   assert.match(html, /id="weekList"/);
-  assert.match(html, /id="shuffleButton"/);
+  assert.doesNotMatch(html, /id="shuffleButton"/);
   assert.match(html, /id="dockShuffleButton"/);
   assert.match(html, /data-open-rules/);
   assert.doesNotMatch(html, /id="ruleButton"/);
@@ -39,8 +39,15 @@ test("sheet and dock have transition styles with reduced motion fallback", () =>
   assert.match(css, /\.app-sheet/);
   assert.match(css, /\.sheet-overlay\.is-open/);
   assert.match(css, /\.home-week-panel/);
-  assert.match(css, /\.shuffle-button/);
   assert.match(css, /\.dock-shuffle-button/);
   assert.match(css, /@keyframes sheetRise/);
   assert.match(css, /prefers-reduced-motion: reduce/);
+});
+
+test("open sheets block dock interaction and keep catalog editing controls sticky", () => {
+  assert.match(css, /\.sheet-overlay\s*{[^}]*z-index:\s*70/s);
+  assert.match(css, /\.app-sheet\s*{[^}]*z-index:\s*80/s);
+  assert.match(css, /\.dock-nav\s*{[^}]*z-index:\s*60/s);
+  assert.match(css, /#catalogView\s*>\s*\.section-header\s*{[^}]*position:\s*sticky/s);
+  assert.match(css, /#catalogView\s*>\s*\.section-header\s*{[^}]*top:\s*0/s);
 });
