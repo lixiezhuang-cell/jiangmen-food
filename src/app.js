@@ -28,7 +28,6 @@
   const CATALOG_STORAGE_KEY = "jiangmen-food-catalog";
 
   const dockButtons = document.querySelectorAll(".dock-button[data-view]");
-  const quickSheetButtons = document.querySelectorAll("[data-open-sheet]");
   const sheetPanels = document.querySelectorAll("[data-sheet-panel]");
   const sheetOverlay = document.querySelector("#sheetOverlay");
   const appSheet = document.querySelector("#appSheet");
@@ -47,10 +46,9 @@
   const toast = document.querySelector("#toast");
   const datePicker = document.querySelector("#datePicker");
   const copyButton = document.querySelector("#copyButton");
-  const shuffleButton = document.querySelector("#dockShuffleButton");
+  const shuffleButton = document.querySelector("#shuffleButton");
   const recordButton = document.querySelector("#recordButton");
   const todayButton = document.querySelector("#todayButton");
-  const ruleButton = document.querySelector("#ruleButton");
   const ruleDialog = document.querySelector("#ruleDialog");
   const yearDatePicker = document.querySelector("#yearDatePicker");
   const yearSearchInput = document.querySelector("#yearSearchInput");
@@ -69,7 +67,6 @@
   const recordCount = document.querySelector("#recordCount");
 
   const SHEET_TITLES = {
-    week: { eyebrow: "排期", title: "未来 10 天" },
     year: { eyebrow: "全年菜单", title: "日历和搜索" },
     records: { eyebrow: "已吃记录", title: "日期记录表" },
     catalog: { eyebrow: "菜谱库", title: "总菜谱" },
@@ -120,9 +117,13 @@
     const insight = getMealInsight(plan, getPreviewPlan(plan), state.mealRecords);
     state.currentPlan = plan;
     dateLabel.textContent = `${plan.date} ${plan.weekday}`;
-    styleLabel.textContent = plan.recorded ? `${plan.style} · 已记录` : plan.style;
+    if (styleLabel) {
+      styleLabel.textContent = plan.recorded ? `${plan.style} · 已记录` : plan.style;
+    }
     comboTitle.textContent = dishesToDisplay(plan.dishes);
-    recommendReason.textContent = insight.reason;
+    if (recommendReason) {
+      recommendReason.textContent = insight.reason;
+    }
     recommendation.classList.toggle("has-risk", repeatedDishes.length > 0);
     renderInsightTags(insight);
     duplicateNote.hidden = repeatedDishes.length === 0;
@@ -141,6 +142,9 @@
   }
 
   function renderInsightTags(insight) {
+    if (!insightGrid) {
+      return;
+    }
     insightGrid.replaceChildren(
       ...insight.tags.slice(0, 6).map((tag) => {
         const item = createTextElement("span", "insight-pill", tag);
@@ -182,17 +186,27 @@
             return chip;
           }),
         );
-        const meta = document.createElement("div");
-        meta.className = "week-meta";
-        meta.replaceChildren(
-          ...insight.tags.slice(0, 3).map((tag) => {
-            const pill = createTextElement("span", "week-meta-pill", tag);
-            pill.classList.toggle("warning", tag === "重复风险");
-            return pill;
-          }),
-        );
+        const metaTags = [];
+        if (insight.recorded) {
+          metaTags.push("已记录");
+        }
+        if (repeatedDishes.length) {
+          metaTags.push(`已重复：${repeatedDishes.join("、")}`);
+        }
 
-        content.append(combo, meta);
+        content.append(combo);
+        if (metaTags.length) {
+          const meta = document.createElement("div");
+          meta.className = "week-meta";
+          meta.replaceChildren(
+            ...metaTags.map((tag) => {
+              const pill = createTextElement("span", "week-meta-pill", tag);
+              pill.classList.toggle("warning", tag.startsWith("已重复"));
+              return pill;
+            }),
+          );
+          content.append(meta);
+        }
         row.append(label, content);
         return row;
       }),
@@ -279,11 +293,9 @@
   }
 
   function updateDockState(viewName) {
+    const dockView = viewName === "records" || viewName === "today" ? viewName : "more";
     dockButtons.forEach((button) => {
-      const isActive =
-        button.dataset.view === viewName ||
-        ((viewName === "week" || viewName === "year") && button.dataset.view === "more");
-      button.classList.toggle("active", isActive);
+      button.classList.toggle("active", button.dataset.view === dockView);
     });
   }
 
@@ -296,10 +308,6 @@
     }
     if (viewName === "records") {
       renderRecords();
-    }
-    if (viewName === "week") {
-      const plan = state.currentPlan ?? getPlanForDate(state.selectedDate, getEffectivePlan());
-      renderWeek(state.selectedDate, getPreviewPlan(plan));
     }
   }
 
@@ -704,16 +712,18 @@
     });
   });
 
-  quickSheetButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      setView(button.dataset.openSheet);
-    });
-  });
-
   sheetOverlay.addEventListener("click", closeSheet);
   sheetCloseButton.addEventListener("click", closeSheet);
 
   appSheet.addEventListener("click", (event) => {
+    const ruleButton = event.target.closest("[data-open-rules]");
+    if (ruleButton) {
+      if (typeof ruleDialog.showModal === "function") {
+        ruleDialog.showModal();
+      }
+      return;
+    }
+
     const target = event.target.closest("[data-sheet-target]");
     if (!target) {
       return;
@@ -790,7 +800,7 @@
       return;
     }
     showSelectedDate(dishButton.dataset.date);
-    openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "week", dishButton.dataset.dishIndex);
+    openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "today", dishButton.dataset.dishIndex);
   });
 
   catalogSearchInput.addEventListener("input", () => {
@@ -846,12 +856,6 @@
       return;
     }
     openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "records", dishButton.dataset.dishIndex);
-  });
-
-  ruleButton.addEventListener("click", () => {
-    if (typeof ruleDialog.showModal === "function") {
-      ruleDialog.showModal();
-    }
   });
 
   showSelectedDate(state.selectedDate);

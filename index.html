@@ -15,26 +15,18 @@
             <p class="eyebrow" id="dateLabel">2026</p>
             <h1 id="app-title">今晚吃什么</h1>
           </div>
-          <button class="icon-button" id="ruleButton" type="button" aria-label="忌口规则">!</button>
         </div>
 
         <article class="recommendation" aria-live="polite">
-          <div class="recommendation-head">
-            <div class="style-pill" id="styleLabel">江门广式</div>
-            <span class="smart-badge">Smart Pick</span>
-          </div>
           <h2 id="comboTitle">加载中</h2>
-          <p class="recommend-reason" id="recommendReason"></p>
-          <div class="insight-grid" id="insightGrid"></div>
           <div class="duplicate-note" id="duplicateNote" hidden></div>
           <div class="dish-list" id="dishList"></div>
         </article>
 
         <div class="actions">
-          <button class="primary-button" id="copyButton" type="button">复制</button>
+          <button class="primary-button shuffle-button" id="shuffleButton" type="button">换一个</button>
           <button class="secondary-button" id="recordButton" type="button">记录</button>
-          <button class="secondary-button" type="button" data-open-sheet="week">未来10天</button>
-          <button class="ghost-button" type="button" data-open-sheet="more">更多</button>
+          <button class="ghost-button" id="copyButton" type="button">复制</button>
         </div>
 
         <div class="date-row">
@@ -43,6 +35,13 @@
         </div>
 
         <span class="toast-pill" id="toast" role="status"></span>
+
+        <section class="home-week-panel" id="homeWeekPanel" aria-labelledby="week-title">
+          <div class="section-header">
+            <h2 id="week-title">未来 10 天</h2>
+          </div>
+          <div class="week-list" id="weekList"></div>
+        </section>
       </section>
     </main>
 
@@ -58,13 +57,6 @@
       </div>
 
       <div class="sheet-body">
-        <section class="sheet-panel week-panel" id="weekView" data-sheet-panel="week" hidden>
-          <div class="section-header">
-            <h2 id="week-title">未来 10 天</h2>
-          </div>
-          <div class="week-list" id="weekList"></div>
-        </section>
-
         <section class="sheet-panel data-panel" id="yearView" data-sheet-panel="year" hidden>
           <div class="section-header">
             <h2>全年日历</h2>
@@ -107,10 +99,6 @@
 
         <section class="sheet-panel more-panel" id="moreView" data-sheet-panel="more" hidden>
           <div class="more-grid">
-            <button class="more-card" type="button" data-sheet-target="week">
-              <span>未来 10 天</span>
-              <strong>看接下来吃什么</strong>
-            </button>
             <button class="more-card" type="button" data-sheet-target="year">
               <span>全年日历</span>
               <strong>按日期和菜名搜索</strong>
@@ -123,6 +111,10 @@
               <span>总菜谱</span>
               <strong>添加、删除、替换菜</strong>
             </button>
+            <button class="more-card" type="button" data-open-rules>
+              <span>点菜规则</span>
+              <strong>查看忌口和搭配边界</strong>
+            </button>
           </div>
         </section>
       </div>
@@ -130,8 +122,6 @@
 
     <nav class="dock-nav" aria-label="底部操作">
       <button class="dock-button active" id="todayButton" type="button" data-view="today">今日</button>
-      <button class="dock-button" type="button" data-view="catalog">菜谱</button>
-      <button class="dock-fab" id="dockShuffleButton" type="button">换一个</button>
       <button class="dock-button" type="button" data-view="records">记录</button>
       <button class="dock-button" type="button" data-view="more">更多</button>
     </nav>

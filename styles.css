@@ -1,21 +1,23 @@
 :root {
   color-scheme: light;
-  --ink: #1d1d1f;
-  --muted: #6e6e73;
-  --paper: #f5f5f7;
-  --panel: rgba(255, 255, 255, 0.72);
-  --line: rgba(60, 60, 67, 0.16);
-  --green: #007aff;
-  --green-2: #3a3a3c;
-  --coral: #ff453a;
-  --amber: #ff9f0a;
+  --ink: #15151a;
+  --muted: #747480;
+  --paper: #fbfcff;
+  --panel: rgba(255, 255, 255, 0.78);
+  --line: rgba(38, 38, 46, 0.12);
+  --green: #0a84ff;
+  --green-2: #202026;
+  --coral: #ff2d55;
+  --amber: #ffcc00;
+  --mint: #30d158;
+  --cyan: #00c7be;
   --wash: rgba(118, 118, 128, 0.12);
   --warm: rgba(255, 255, 255, 0.56);
-  --shadow: 0 22px 54px rgba(0, 0, 0, 0.12);
-  --soft-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
-  --glass: rgba(255, 255, 255, 0.64);
-  --glass-strong: rgba(255, 255, 255, 0.82);
-  --blue-wash: rgba(0, 122, 255, 0.1);
+  --shadow: 0 22px 54px rgba(39, 42, 64, 0.14);
+  --soft-shadow: 0 12px 30px rgba(39, 42, 64, 0.09);
+  --glass: rgba(255, 255, 255, 0.7);
+  --glass-strong: rgba(255, 255, 255, 0.9);
+  --blue-wash: rgba(10, 132, 255, 0.1);
 }
 
 * {
@@ -26,7 +28,9 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    linear-gradient(180deg, #fbfbfd 0%, #f5f5f7 42%, #edf4ff 100%),
+    linear-gradient(135deg, rgba(48, 209, 88, 0.11) 0 19%, transparent 19% 100%),
+    linear-gradient(210deg, transparent 0 58%, rgba(255, 204, 0, 0.16) 58% 76%, transparent 76% 100%),
+    linear-gradient(180deg, #ffffff 0%, #f4f8ff 48%, #fff8ee 100%),
     var(--paper);
   color: var(--ink);
   font-family:
@@ -62,24 +66,23 @@ button {
   bottom: max(10px, env(safe-area-inset-bottom));
   left: auto;
   z-index: 60;
-  width: min(calc(100% - 20px), 680px);
+  width: min(calc(100% - 24px), 420px);
   transform: translateX(50%);
   display: grid;
-  grid-template-columns: 1fr 1fr 84px 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   align-items: end;
-  gap: 6px;
+  gap: 5px;
   margin: 0;
   padding: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.82);
   border-radius: 8px;
-  background: rgba(246, 247, 251, 0.76);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.16);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18px 46px rgba(36, 41, 69, 0.16);
   -webkit-backdrop-filter: blur(24px) saturate(1.6);
   backdrop-filter: blur(24px) saturate(1.6);
 }
 
-.dock-button,
-.dock-fab {
+.dock-button {
   min-height: 42px;
   border: 0;
   border-radius: 8px;
@@ -94,28 +97,13 @@ button {
 }
 
 .dock-button.active {
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--ink);
-  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.1);
-}
-
-.dock-fab {
-  min-height: 62px;
-  margin-top: -18px;
-  background: linear-gradient(180deg, #2f8dff, var(--green));
+  background: #15151a;
   color: #fff;
-  box-shadow:
-    0 16px 30px rgba(0, 122, 255, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 9px 20px rgba(21, 21, 26, 0.18);
 }
 
-.dock-fab:active,
 .dock-button:active {
   transform: translateY(1px) scale(0.98);
-}
-
-.dock-fab.is-pulsing {
-  animation: fabPulse 0.42s ease;
 }
 
 .today-panel,
@@ -131,10 +119,12 @@ button {
 }
 
 .today-panel {
-  padding: 18px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.56)),
-    var(--panel);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 body.sheet-open {
@@ -344,24 +334,32 @@ h1 {
 .recommendation {
   position: relative;
   overflow: hidden;
-  margin-top: 18px;
-  padding: 17px;
+  margin-top: 16px;
+  padding: 18px;
   border-radius: 8px;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(236, 245, 255, 0.72)),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(234, 255, 244, 0.72) 42%, rgba(236, 245, 255, 0.76)),
     var(--glass);
   color: var(--ink);
-  min-height: 196px;
+  min-height: 166px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 16px;
+  gap: 18px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.76),
-    0 16px 36px rgba(0, 122, 255, 0.1);
+    0 18px 38px rgba(10, 132, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.82);
   -webkit-backdrop-filter: blur(20px) saturate(1.35);
   backdrop-filter: blur(20px) saturate(1.35);
+}
+
+.recommendation::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(90deg, var(--mint), var(--cyan), var(--green), var(--coral));
 }
 
 .recommendation > * {
@@ -398,7 +396,7 @@ h1 {
 }
 
 .recommendation h2 {
-  font-size: 32px;
+  font-size: 34px;
   line-height: 1.12;
   letter-spacing: 0;
   word-break: keep-all;
@@ -443,7 +441,7 @@ h1 {
 
 .recommendation.has-risk {
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(255, 242, 240, 0.76)),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(255, 237, 242, 0.78)),
     var(--glass);
 }
 
@@ -512,7 +510,7 @@ h1 {
 
 .actions {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1.2fr 1fr 1fr;
   gap: 8px;
   margin-top: 12px;
 }
@@ -528,9 +526,19 @@ h1 {
 }
 
 .primary-button {
-  background: var(--green);
+  background: linear-gradient(135deg, #15151a, #33333b);
   color: #fff;
-  box-shadow: 0 10px 22px rgba(0, 122, 255, 0.28);
+  box-shadow: 0 12px 24px rgba(21, 21, 26, 0.2);
+}
+
+.shuffle-button {
+  background: linear-gradient(135deg, var(--mint), var(--cyan));
+  color: #061a17;
+  box-shadow: 0 12px 24px rgba(0, 199, 190, 0.22);
+}
+
+.shuffle-button.is-pulsing {
+  animation: fabPulse 0.42s ease;
 }
 
 .secondary-button {
@@ -573,11 +581,26 @@ h1 {
   font-weight: 750;
 }
 
+.home-week-panel,
 .week-panel,
 .records-panel,
 .data-panel {
   margin-top: 12px;
   padding: 16px;
+}
+
+.home-week-panel {
+  margin-top: 14px;
+  border: 1px solid rgba(38, 38, 46, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--soft-shadow);
+  -webkit-backdrop-filter: blur(20px) saturate(1.25);
+  backdrop-filter: blur(20px) saturate(1.25);
+}
+
+.home-week-panel .section-header {
+  padding-bottom: 3px;
 }
 
 .section-header h2 {
@@ -1081,7 +1104,7 @@ button:active {
   }
 
   .actions {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.2fr 1fr 1fr;
   }
 
   .ghost-button {
@@ -1104,11 +1127,6 @@ button:active {
 
   .dock-button {
     min-height: 38px;
-    font-size: 14px;
-  }
-
-  .dock-fab {
-    min-height: 58px;
     font-size: 14px;
   }
 
