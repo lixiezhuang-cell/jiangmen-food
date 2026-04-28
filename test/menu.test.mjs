@@ -3,12 +3,25 @@ import { test } from "node:test";
 
 import { MENU_PLAN } from "../src/menu-data.mjs";
 import {
+  BANNED_TERMS,
   buildShareText,
   getAlternatePlan,
   getPlanForDate,
   getWeekPlans,
   validateMenuPlan,
 } from "../src/core.mjs";
+
+test("goose intestine is treated as a banned dish family", () => {
+  assert.ok(BANNED_TERMS.includes("鹅肠"));
+});
+
+test("requested dishes appear in the generated menu plan", () => {
+  const dishes = new Set(MENU_PLAN.flatMap((item) => item.dishes));
+
+  for (const dish of ["蒸黄沙蚬", "烤鱼"]) {
+    assert.ok(dishes.has(dish), `${dish} should be scheduled at least once`);
+  }
+});
 
 test("menu data covers every day of 2026", () => {
   assert.equal(MENU_PLAN.length, 365);
