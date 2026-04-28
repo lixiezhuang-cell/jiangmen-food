@@ -194,6 +194,13 @@ h1 {
   position: relative;
 }
 
+.recommendation-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .style-pill {
   width: max-content;
   max-width: 100%;
@@ -205,12 +212,65 @@ h1 {
   font-weight: 750;
 }
 
+.smart-badge {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border: 1px solid rgba(0, 122, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 750;
+}
+
 .recommendation h2 {
   font-size: 32px;
   line-height: 1.12;
   letter-spacing: 0;
   word-break: keep-all;
   overflow-wrap: anywhere;
+}
+
+.recommend-reason {
+  color: rgba(60, 60, 67, 0.74);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.insight-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.insight-pill {
+  min-height: 28px;
+  padding: 6px 9px;
+  border: 1px solid rgba(60, 60, 67, 0.11);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.54);
+  color: var(--green-2);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.insight-pill.good {
+  border-color: rgba(52, 199, 89, 0.22);
+  background: rgba(52, 199, 89, 0.11);
+  color: #248a3d;
+}
+
+.insight-pill.warning {
+  border-color: rgba(255, 69, 58, 0.22);
+  background: rgba(255, 69, 58, 0.1);
+  color: var(--coral);
+}
+
+.recommendation.has-risk {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(255, 242, 240, 0.76)),
+    var(--glass);
 }
 
 .dish-list {
@@ -642,16 +702,21 @@ h1 {
 
 .week-list {
   display: grid;
-  gap: 4px;
-  margin-top: 12px;
+  gap: 0;
+  margin-top: 16px;
 }
 
 .week-item {
+  position: relative;
   display: grid;
-  grid-template-columns: 86px 1fr;
-  gap: 10px;
-  padding: 12px 0;
+  grid-template-columns: 78px 1fr;
+  gap: 12px;
+  padding: 14px 0;
   border-bottom: 1px solid rgba(60, 60, 67, 0.1);
+}
+
+.week-item.selected {
+  color: var(--ink);
 }
 
 .week-item:last-child {
@@ -659,16 +724,61 @@ h1 {
 }
 
 .week-date {
+  display: grid;
+  align-content: start;
+  gap: 2px;
   color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
   font-weight: 750;
 }
 
-.week-combo {
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.45;
+.week-day {
+  color: rgba(60, 60, 67, 0.58);
+  font-size: 12px;
+}
+
+.week-date-number {
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.week-item.selected .week-date-number {
+  color: var(--green);
+}
+
+.week-content {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.week-item.selected .week-content {
+  margin: -8px 0;
+  padding: 8px;
+  border: 1px solid rgba(0, 122, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(0, 122, 255, 0.06);
+}
+
+.week-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.week-meta-pill {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(118, 118, 128, 0.1);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.week-meta-pill.warning {
+  background: rgba(255, 69, 58, 0.1);
+  color: var(--coral);
 }
 
 .rule-dialog {

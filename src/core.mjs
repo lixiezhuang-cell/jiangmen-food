@@ -100,6 +100,139 @@ const DISH_FAMILY_RULES = [
   { family: "小食", terms: ["花生", "毛豆", "藕片", "土豆片"] },
 ];
 
+const DRINKING_DISH_TERMS = [
+  "下酒",
+  "鸡尖",
+  "鸡翅尖",
+  "鸡脚",
+  "凤爪",
+  "鸡软骨",
+  "鸡中宝",
+  "鸭脖",
+  "鸭锁骨",
+  "鸭舌",
+  "鹅肾",
+  "鹅杂",
+  "猪耳",
+  "猪舌",
+  "鱼骨",
+  "鱼皮",
+  "鱼肠",
+  "田螺",
+  "鱿鱼",
+  "黄沙蚬",
+  "青口",
+  "椒盐",
+  "盐焗",
+  "沙姜",
+  "卤",
+  "周黑鸭",
+  "花生",
+  "毛豆",
+  "辣",
+];
+
+const MAIN_DISH_TERMS = [
+  "牛",
+  "排骨",
+  "烧鸡",
+  "鸡煲",
+  "猪肚",
+  "生肠",
+  "粉肠",
+  "大肠",
+  "猪手",
+  "猪尾",
+  "烧肉",
+  "叉烧",
+  "肉饼",
+  "鱼腩",
+  "烤鱼",
+  "炒粉",
+  "炒面",
+  "牛河",
+  "粥",
+];
+
+const NIGHT_STYLE_TERMS = ["夜宵", "下酒", "大排档", "烧烤", "卤味"];
+
+function includesAnyTerm(text, terms) {
+  return terms.some((term) => text.includes(term));
+}
+
+function getDishProfile(dish) {
+  const families = getDishFamilies(dish);
+  return {
+    drinking: includesAnyTerm(dish, DRINKING_DISH_TERMS),
+    main: includesAnyTerm(dish, MAIN_DISH_TERMS),
+    vegetable: families.includes("青菜"),
+    staple: families.includes("粉面粥"),
+  };
+}
+
+function getMealProfile(item) {
+  const profiles = item.dishes.map(getDishProfile);
+  return {
+    hasDrinking: profiles.some((profile) => profile.drinking),
+    hasMain: profiles.some((profile) => profile.main),
+    hasVegetable: profiles.some((profile) => profile.vegetable),
+    hasStaple: profiles.some((profile) => profile.staple),
+  };
+}
+
+function isRecordedDate(date, records = []) {
+  return records.some((record) => record.date === date);
+}
+
+export function getMealInsight(item, plan = [], records = []) {
+  const duplicateMap = plan.length ? findTenDayDuplicateDishes(plan) : {};
+  const repeatedDishes = duplicateMap[item.date] ?? [];
+  const profile = getMealProfile(item);
+  const recorded = Boolean(item.recorded) || isRecordedDate(item.date, records);
+  const tags = [];
+
+  if (profile.hasDrinking && profile.hasMain) {
+    tags.push("下酒搭配");
+  } else if (profile.hasDrinking) {
+    tags.push("偏下酒");
+  } else {
+    tags.push("正餐友好");
+  }
+
+  tags.push(recorded ? "已记录" : "未记录");
+  tags.push(repeatedDishes.length ? "重复风险" : "10天避重");
+  tags.push(item.dishes.length >= 3 ? "三菜小局" : "二人刚好");
+
+  if (profile.hasVegetable) {
+    tags.push("带青菜");
+  }
+  if (profile.hasStaple) {
+    tags.push("粉面粥");
+  }
+  if (includesAnyTerm(`${item.style} ${item.combo}`, NIGHT_STYLE_TERMS)) {
+    tags.push("适合夜宵");
+  }
+
+  const pairingReason =
+    profile.hasDrinking && profile.hasMain
+      ? "一份主菜配一份下酒菜"
+      : profile.hasDrinking
+        ? "整体更偏下酒"
+        : "整体更偏正餐";
+  const duplicateReason = repeatedDishes.length
+    ? `10 天内撞菜：${repeatedDishes.join("、")}`
+    : "10 天内不撞菜";
+  const countReason = item.dishes.length >= 3 ? "偶尔三菜，适合小局" : "二人份量更稳";
+
+  return {
+    tags,
+    repeatedDishes,
+    recorded,
+    profile,
+    reason: `${pairingReason}，${countReason}，${duplicateReason}。`,
+  };
+}
+
 export function getDishFamilies(dish) {
   const family = DISH_FAMILY_RULES.find((rule) => {
     const excluded = rule.excludeTerms?.some((term) => dish.includes(term));
@@ -434,6 +567,88 @@ export function getReassignedPlan(value, plan, offset = 1) {
     ...source,
     dishes,
     combo: dishes.join(" + "),
+  };
+}
+
+function hasNearbyDishCollision(date, dishes, plan, ignoredDate) {
+  const sourceDate = new Date(`${date}T00:00:00`);
+  const dishSet = new Set(dishes);
+
+  return plan.some((item) => {
+    if (item.date === date || item.date === ignoredDate) {
+      return false;
+    }
+    const itemDate = new Date(`${item.date}T00:00:00`);
+    const daysBetween = Math.abs((itemDate.getTime() - sourceDate.getTime()) / MS_PER_DAY);
+    return daysBetween <= 10 && item.dishes.some((dish) => dishSet.has(dish));
+  });
+}
+
+function scoreSmartCandidate(candidate, source, plan, records, rank, offset) {
+  if (candidate.date === source.date) {
+    return Number.NEGATIVE_INFINITY;
+  }
+  if (candidate.dishes.some((dish) => source.dishes.includes(dish) || hasBannedTerm(dish))) {
+    return Number.NEGATIVE_INFINITY;
+  }
+  if (findSameDishFamilies(candidate.dishes).length) {
+    return Number.NEGATIVE_INFINITY;
+  }
+  if (hasNearbyDishCollision(source.date, candidate.dishes, plan, candidate.date)) {
+    return Number.NEGATIVE_INFINITY;
+  }
+
+  const insight = getMealInsight(candidate, [], records);
+  let score = 80;
+  if (insight.profile.hasMain && insight.profile.hasDrinking) {
+    score += 26;
+  }
+  if (insight.profile.hasVegetable) {
+    score += 6;
+  }
+  if (includesAnyTerm(`${candidate.style} ${candidate.combo}`, NIGHT_STYLE_TERMS)) {
+    score += 8;
+  }
+  if (candidate.dishes.length === 2) {
+    score += 10;
+  } else if (candidate.dishes.length === 3) {
+    score += offset % 5 === 0 ? 8 : -6;
+  } else {
+    score -= 12;
+  }
+  if (isRecordedDate(candidate.date, records)) {
+    score -= 24;
+  }
+
+  return score - rank * 0.15;
+}
+
+export function getSmartReassignedPlan(value, plan, offset = 1, records = []) {
+  const source = getPlanForDate(value, plan);
+  const sourceIndex = plan.findIndex((entry) => entry.date === source.date);
+  let bestCandidate = null;
+  let bestScore = Number.NEGATIVE_INFINITY;
+
+  for (let rank = 0; rank < plan.length - 1; rank += 1) {
+    const distance = offset + rank;
+    const candidate = plan[(sourceIndex + distance) % plan.length];
+    const score = scoreSmartCandidate(candidate, source, plan, records, rank, offset);
+    if (score > bestScore) {
+      bestScore = score;
+      bestCandidate = candidate;
+    }
+  }
+
+  if (!bestCandidate) {
+    return getReassignedPlan(value, plan, offset);
+  }
+
+  return {
+    ...source,
+    style: bestCandidate.style,
+    dishes: [...bestCandidate.dishes],
+    combo: bestCandidate.dishes.join(" + "),
+    smart: true,
   };
 }
 

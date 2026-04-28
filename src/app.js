@@ -8,8 +8,9 @@
     findSameDishFamilies,
     findTenDayDuplicateDishes,
     formatDate,
+    getMealInsight,
     getPlanForDate,
-    getReassignedPlan,
+    getSmartReassignedPlan,
     getWeekPlans,
     groupPlansByMonth,
     isSelectedDish,
@@ -30,7 +31,10 @@
   const viewPanels = document.querySelectorAll("[data-view-panel]");
   const dateLabel = document.querySelector("#dateLabel");
   const styleLabel = document.querySelector("#styleLabel");
+  const recommendation = document.querySelector(".recommendation");
   const comboTitle = document.querySelector("#comboTitle");
+  const recommendReason = document.querySelector("#recommendReason");
+  const insightGrid = document.querySelector("#insightGrid");
   const duplicateNote = document.querySelector("#duplicateNote");
   const dishList = document.querySelector("#dishList");
   const weekList = document.querySelector("#weekList");
@@ -99,10 +103,14 @@
   function render(plan) {
     const duplicateMap = getDuplicateMap(getPreviewPlan(plan));
     const repeatedDishes = getDuplicateDishes(plan.date, duplicateMap);
+    const insight = getMealInsight(plan, getPreviewPlan(plan), state.mealRecords);
     state.currentPlan = plan;
     dateLabel.textContent = `${plan.date} ${plan.weekday}`;
     styleLabel.textContent = plan.recorded ? `${plan.style} · 已记录` : plan.style;
     comboTitle.textContent = dishesToDisplay(plan.dishes);
+    recommendReason.textContent = insight.reason;
+    recommendation.classList.toggle("has-risk", repeatedDishes.length > 0);
+    renderInsightTags(insight);
     duplicateNote.hidden = repeatedDishes.length === 0;
     duplicateNote.textContent = repeatedDishes.length ? `已重复：${repeatedDishes.join("、")}` : "";
     dishList.replaceChildren(
@@ -114,23 +122,42 @@
     );
 
     datePicker.value = plan.date;
-    renderWeek(plan.date);
+    renderWeek(plan.date, getPreviewPlan(plan));
     renderYearSelected(plan.date);
   }
 
-  function renderWeek(date) {
-    const effectivePlan = getEffectivePlan();
+  function renderInsightTags(insight) {
+    insightGrid.replaceChildren(
+      ...insight.tags.slice(0, 6).map((tag) => {
+        const item = createTextElement("span", "insight-pill", tag);
+        item.classList.toggle("warning", tag === "重复风险");
+        item.classList.toggle("good", tag === "10天避重" || tag === "已记录");
+        return item;
+      }),
+    );
+  }
+
+  function renderWeek(date, plan = getEffectivePlan()) {
+    const effectivePlan = plan;
     const duplicateMap = getDuplicateMap(effectivePlan);
     const items = getWeekPlans(date, effectivePlan);
     weekList.replaceChildren(
       ...items.map((item) => {
+        const insight = getMealInsight(item, effectivePlan, state.mealRecords);
         const row = document.createElement("article");
         row.className = "week-item";
+        row.classList.toggle("selected", item.date === state.selectedDate);
+        row.classList.toggle("recorded", insight.recorded);
 
         const label = document.createElement("div");
         label.className = "week-date";
-        label.textContent = `${item.date.slice(5)} ${item.weekday}`;
+        label.replaceChildren(
+          createTextElement("span", "week-day", item.weekday),
+          createTextElement("span", "week-date-number", item.date.slice(5)),
+        );
 
+        const content = document.createElement("div");
+        content.className = "week-content";
         const combo = document.createElement("div");
         combo.className = "week-dishes";
         const repeatedDishes = getDuplicateDishes(item.date, duplicateMap);
@@ -141,8 +168,18 @@
             return chip;
           }),
         );
+        const meta = document.createElement("div");
+        meta.className = "week-meta";
+        meta.replaceChildren(
+          ...insight.tags.slice(0, 3).map((tag) => {
+            const pill = createTextElement("span", "week-meta-pill", tag);
+            pill.classList.toggle("warning", tag === "重复风险");
+            return pill;
+          }),
+        );
 
-        row.append(label, combo);
+        content.append(combo, meta);
+        row.append(label, content);
         return row;
       }),
     );
@@ -607,7 +644,7 @@
   });
 
   shuffleButton.addEventListener("click", () => {
-    const plan = getReassignedPlan(state.selectedDate, getEffectivePlan(), state.reassignOffset);
+    const plan = getSmartReassignedPlan(state.selectedDate, getEffectivePlan(), state.reassignOffset, state.mealRecords);
     state.reassignOffset += 1;
     render(plan);
   });

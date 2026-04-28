@@ -10,9 +10,11 @@ import {
   comboToDishes,
   findTenDayDuplicateDishes,
   findSameDishFamilies,
+  getMealInsight,
   getAlternatePlan,
   getPlanForDate,
   getReassignedPlan,
+  getSmartReassignedPlan,
   getWeekPlans,
   groupPlansByMonth,
   isSelectedDish,
@@ -271,6 +273,74 @@ test("reassigned plans avoid same-family dish stacks across repeated shuffles", 
     const reassigned = getReassignedPlan("2026-04-28", MENU_PLAN, offset);
     assert.deepEqual(findSameDishFamilies(reassigned.dishes), [], reassigned.combo);
   }
+});
+
+test("meal insight labels pairings, records, and duplicate risk", () => {
+  const item = {
+    date: "2026-01-01",
+    weekday: "周四",
+    combo: "铁板牛肉 + 沙姜鸡尖",
+    dishes: ["铁板牛肉", "沙姜鸡尖"],
+    style: "大排档下酒",
+    recorded: true,
+  };
+  const plan = [
+    item,
+    {
+      date: "2026-01-05",
+      weekday: "周一",
+      combo: "豉汁排骨 + 沙姜鸡尖",
+      dishes: ["豉汁排骨", "沙姜鸡尖"],
+      style: "下酒",
+    },
+  ];
+
+  const insight = getMealInsight(item, plan, [{ date: item.date }]);
+
+  assert.deepEqual(insight.tags.slice(0, 3), ["下酒搭配", "已记录", "重复风险"]);
+  assert.equal(insight.repeatedDishes.includes("沙姜鸡尖"), true);
+  assert.match(insight.reason, /一份主菜/);
+  assert.match(insight.reason, /10 天内撞菜/);
+});
+
+test("smart reassigned plans prefer unrecorded pairings without nearby duplicates", () => {
+  const plan = [
+    {
+      date: "2026-01-01",
+      weekday: "周四",
+      combo: "豉汁排骨 + 蒜蓉通菜",
+      dishes: ["豉汁排骨", "蒜蓉通菜"],
+      style: "大排档",
+    },
+    {
+      date: "2026-01-02",
+      weekday: "周五",
+      combo: "沙姜鸡尖 + 凉拌青瓜",
+      dishes: ["沙姜鸡尖", "凉拌青瓜"],
+      style: "下酒",
+    },
+    {
+      date: "2026-01-03",
+      weekday: "周六",
+      combo: "铁板牛肉 + 椒盐鱼骨",
+      dishes: ["铁板牛肉", "椒盐鱼骨"],
+      style: "大排档下酒",
+    },
+    {
+      date: "2026-01-04",
+      weekday: "周日",
+      combo: "烧排骨 + 沙姜鸡尖",
+      dishes: ["烧排骨", "沙姜鸡尖"],
+      style: "夜宵",
+    },
+  ];
+
+  const reassigned = getSmartReassignedPlan("2026-01-01", plan, 1, [{ date: "2026-01-02" }]);
+
+  assert.equal(reassigned.date, "2026-01-01");
+  assert.deepEqual(reassigned.dishes, ["铁板牛肉", "椒盐鱼骨"]);
+  assert.equal(reassigned.style, "大排档下酒");
+  assert.deepEqual(findSameDishFamilies(reassigned.dishes), []);
 });
 
 test("week plans returns a ten-day window starting from the selected date", () => {
