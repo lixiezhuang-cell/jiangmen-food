@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import { DISH_POOL, MENU_PLAN } from "../src/menu-data.mjs";
 import {
+  addCustomDish,
   applyMealRecordsToPlan,
   BANNED_TERMS,
   buildShareText,
@@ -15,6 +16,9 @@ import {
   getWeekPlans,
   groupPlansByMonth,
   isSelectedDish,
+  mergeDishPool,
+  removeDishFromPoolState,
+  replaceDishInPlanItem,
   searchMenuPlan,
   searchDishPool,
   sortMealRecords,
@@ -109,6 +113,39 @@ test("recorded meals override the yearly plan and split dish names", () => {
   assert.deepEqual(updated.dishes, ["手写菜名", "蒜蓉通菜", "沙姜鸡尖"]);
   assert.equal(updated.recorded, true);
   assert.equal(updated.note, "少油");
+});
+
+test("dish replacement rewrites one dish in a plan item", () => {
+  const plan = {
+    date: "2026-04-28",
+    weekday: "周二",
+    combo: "鱼肠煎蛋 + 腐乳通菜",
+    dishes: ["鱼肠煎蛋", "腐乳通菜"],
+    style: "鱼水产下酒",
+  };
+  const replaced = replaceDishInPlanItem(plan, "鱼肠煎蛋", "豉汁排骨");
+  const unchanged = replaceDishInPlanItem(plan, "不存在", "豉汁排骨");
+
+  assert.deepEqual(replaced.dishes, ["豉汁排骨", "腐乳通菜"]);
+  assert.equal(replaced.combo, "豉汁排骨 + 腐乳通菜");
+  assert.equal(unchanged, plan);
+});
+
+test("custom dish pool additions and deletions are applied locally", () => {
+  const added = addCustomDish([], "  五邑小炒  ");
+  const deduped = addCustomDish(added, "五邑小炒");
+  const withCustom = mergeDishPool(DISH_POOL, deduped, []);
+  const removedCustom = removeDishFromPoolState({ customDishes: deduped, deletedDishes: [] }, "五邑小炒");
+  const hiddenBuiltIn = removeDishFromPoolState(removedCustom, "豉汁排骨");
+  const filtered = mergeDishPool(DISH_POOL, hiddenBuiltIn.customDishes, hiddenBuiltIn.deletedDishes);
+  const allDishes = filtered.flatMap((category) => category.dishes);
+
+  assert.deepEqual(deduped, ["五邑小炒"]);
+  assert.equal(withCustom.at(-1).name, "自定义菜品");
+  assert.ok(withCustom.at(-1).dishes.includes("五邑小炒"));
+  assert.deepEqual(removedCustom.customDishes, []);
+  assert.deepEqual(hiddenBuiltIn.deletedDishes, ["豉汁排骨"]);
+  assert.equal(allDishes.includes("豉汁排骨"), false);
 });
 
 test("duplicate dish markers include both dates within a ten day window", () => {

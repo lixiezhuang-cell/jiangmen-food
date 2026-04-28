@@ -44,7 +44,7 @@ textarea {
 
 .view-tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin-bottom: 12px;
 }
@@ -344,30 +344,6 @@ h1 {
   color: var(--green);
 }
 
-.year-edit {
-  display: grid;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.year-combo-editor {
-  width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 9px 10px;
-  background: #fff;
-  color: var(--ink);
-  font-weight: 700;
-  line-height: 1.45;
-  resize: vertical;
-}
-
-.year-update-button {
-  justify-self: start;
-  min-width: 92px;
-  padding: 0 18px;
-}
-
 .year-calendar,
 .catalog-list {
   display: grid;
@@ -435,18 +411,62 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+.catalog-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.catalog-editor input {
+  min-height: 42px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #fff;
+  color: var(--ink);
+}
+
+.catalog-editor .secondary-button {
+  min-width: 82px;
+  min-height: 42px;
+  padding: 0 16px;
+}
+
+.catalog-hint {
+  margin-top: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: #fff3ec;
+  color: var(--coral);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.catalog-hint[hidden] {
+  display: none;
+}
+
 .catalog-dishes {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
+.catalog-dish-item {
+  display: inline-flex;
+  align-items: stretch;
+}
+
 .catalog-dish {
   padding: 7px 9px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 999px 0 0 999px;
   background: var(--wash);
+  color: var(--green);
   font-size: 14px;
+  font-weight: 800;
   line-height: 1.2;
 }
 
@@ -455,6 +475,23 @@ h1 {
   background: #fff3ec;
   color: var(--coral);
   font-weight: 800;
+}
+
+.delete-dish-button {
+  min-width: 31px;
+  border: 1px solid var(--line);
+  border-left: 0;
+  border-radius: 0 999px 999px 0;
+  background: #fff;
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.delete-dish-button:active,
+.delete-dish-button:hover {
+  color: var(--coral);
 }
 
 .record-list {
@@ -480,7 +517,17 @@ h1 {
   font-weight: 700;
 }
 
-.record-combo,
+.record-dishes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.record-dish-button {
+  background: var(--wash);
+  color: var(--green);
+}
+
 .record-note {
   width: 100%;
   border: 1px solid var(--line);
@@ -490,10 +537,6 @@ h1 {
   color: var(--ink);
   line-height: 1.45;
   resize: vertical;
-}
-
-.record-combo {
-  font-weight: 700;
 }
 
 .empty-state {
@@ -580,8 +623,21 @@ button:active {
     grid-template-columns: 1fr;
   }
 
+  .view-tabs {
+    gap: 6px;
+  }
+
+  .view-tab {
+    min-height: 38px;
+    font-size: 14px;
+  }
+
   .year-day {
     grid-template-columns: 64px 1fr;
+  }
+
+  .catalog-editor {
+    grid-template-columns: 1fr;
   }
 
   .year-day-style,

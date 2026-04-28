@@ -146,6 +146,54 @@ export function searchDishPool(dishPool, query) {
     .filter((category) => category.dishes.length > 0);
 }
 
+export function addCustomDish(customDishes, dish) {
+  const normalized = dish.trim();
+  if (!normalized || customDishes.includes(normalized)) {
+    return customDishes;
+  }
+  return [...customDishes, normalized];
+}
+
+export function removeDishFromPoolState(state, dish) {
+  const normalized = dish.trim();
+  if (!normalized) {
+    return state;
+  }
+
+  if (state.customDishes.includes(normalized)) {
+    return {
+      customDishes: state.customDishes.filter((item) => item !== normalized),
+      deletedDishes: state.deletedDishes.filter((item) => item !== normalized),
+    };
+  }
+
+  if (state.deletedDishes.includes(normalized)) {
+    return state;
+  }
+
+  return {
+    customDishes: state.customDishes,
+    deletedDishes: [...state.deletedDishes, normalized],
+  };
+}
+
+export function mergeDishPool(dishPool, customDishes = [], deletedDishes = []) {
+  const deleted = new Set(deletedDishes);
+  const custom = customDishes.filter((dish) => !deleted.has(dish));
+  const merged = dishPool
+    .map((category) => ({
+      ...category,
+      dishes: category.dishes.filter((dish) => !deleted.has(dish) && !custom.includes(dish)),
+    }))
+    .filter((category) => category.dishes.length > 0);
+
+  if (custom.length) {
+    merged.push({ name: "自定义菜品", dishes: custom });
+  }
+
+  return merged;
+}
+
 export function isSelectedDish(dish, selectedDish) {
   return selectedDish.trim() !== "" && dish === selectedDish;
 }
@@ -207,6 +255,22 @@ export function applyMealRecordsToPlan(plan, records) {
       recorded: true,
     };
   });
+}
+
+export function replaceDishInPlanItem(item, oldDish, newDish) {
+  const oldName = oldDish.trim();
+  const newName = newDish.trim();
+  const index = item.dishes.findIndex((dish) => dish === oldName);
+  if (index < 0 || !newName) {
+    return item;
+  }
+
+  const dishes = item.dishes.map((dish, dishIndex) => (dishIndex === index ? newName : dish));
+  return {
+    ...item,
+    dishes,
+    combo: dishes.join(" + "),
+  };
 }
 
 function addDuplicateDish(duplicates, date, dish) {

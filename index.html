@@ -12,6 +12,7 @@
       <nav class="view-tabs" aria-label="菜单视图">
         <button class="view-tab active" type="button" data-view="today">今日</button>
         <button class="view-tab" type="button" data-view="year">全年</button>
+        <button class="view-tab" type="button" data-view="records">记录</button>
         <button class="view-tab" type="button" data-view="catalog">菜谱</button>
       </nav>
 
@@ -53,13 +54,6 @@
           <div class="week-list" id="weekList"></div>
         </section>
 
-        <section class="records-panel" aria-labelledby="records-title">
-          <div class="section-header">
-            <h2 id="records-title">日期记录表</h2>
-            <span id="recordCount"></span>
-          </div>
-          <div class="record-list" id="recordList"></div>
-        </section>
       </section>
 
       <section class="view-panel data-panel" id="yearView" data-view-panel="year" hidden>
@@ -75,6 +69,14 @@
         <div class="year-calendar" id="yearCalendar"></div>
       </section>
 
+      <section class="view-panel data-panel records-panel" id="recordsView" data-view-panel="records" hidden>
+        <div class="section-header">
+          <h2 id="records-title">日期记录表</h2>
+          <span id="recordCount"></span>
+        </div>
+        <div class="record-list" id="recordList"></div>
+      </section>
+
       <section class="view-panel data-panel" id="catalogView" data-view-panel="catalog" hidden>
         <div class="section-header">
           <h2>总菜谱</h2>
@@ -83,6 +85,11 @@
         <div class="filter-row single">
           <input id="catalogSearchInput" type="search" placeholder="搜索菜名" />
         </div>
+        <div class="catalog-editor">
+          <input id="customDishInput" type="text" placeholder="新增菜名" />
+          <button class="secondary-button" id="addDishButton" type="button">添加</button>
+        </div>
+        <div class="catalog-hint" id="catalogHint"></div>
         <div class="catalog-list" id="catalogList"></div>
       </section>
     </main>

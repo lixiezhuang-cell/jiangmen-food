@@ -1,8 +1,11 @@
 (function () {
   const {
+    addCustomDish,
     applyMealRecordsToPlan,
+    BANNED_TERMS,
     buildShareText,
     comboToDishes,
+    findSameDishFamilies,
     findTenDayDuplicateDishes,
     formatDate,
     getPlanForDate,
@@ -10,6 +13,9 @@
     getWeekPlans,
     groupPlansByMonth,
     isSelectedDish,
+    mergeDishPool,
+    removeDishFromPoolState,
+    replaceDishInPlanItem,
     searchDishPool,
     searchMenuPlan,
     updateMealRecord,
@@ -18,6 +24,7 @@
   const MENU_PLAN = window.MENU_PLAN;
   const DISH_POOL = window.DISH_POOL;
   const RECORDS_STORAGE_KEY = "jiangmen-food-records";
+  const CATALOG_STORAGE_KEY = "jiangmen-food-catalog";
 
   const viewButtons = document.querySelectorAll(".view-tab");
   const viewPanels = document.querySelectorAll("[data-view-panel]");
@@ -41,21 +48,33 @@
   const yearCalendar = document.querySelector("#yearCalendar");
   const yearCount = document.querySelector("#yearCount");
   const catalogSearchInput = document.querySelector("#catalogSearchInput");
+  const customDishInput = document.querySelector("#customDishInput");
+  const addDishButton = document.querySelector("#addDishButton");
+  const catalogHint = document.querySelector("#catalogHint");
   const catalogList = document.querySelector("#catalogList");
   const catalogCount = document.querySelector("#catalogCount");
   const recordList = document.querySelector("#recordList");
   const recordCount = document.querySelector("#recordCount");
 
+  const catalogState = loadCatalogState();
   const state = {
+    activeView: "today",
     selectedDate: formatDate(new Date()),
     reassignOffset: 1,
     currentPlan: null,
     selectedDish: "",
+    replacementTarget: null,
     mealRecords: loadMealRecords(),
+    customDishes: catalogState.customDishes,
+    deletedDishes: catalogState.deletedDishes,
   };
 
   function getEffectivePlan() {
     return applyMealRecordsToPlan(MENU_PLAN, state.mealRecords);
+  }
+
+  function getCatalogPool() {
+    return mergeDishPool(DISH_POOL, state.customDishes, state.deletedDishes);
   }
 
   function getPreviewPlan(plan) {
@@ -72,14 +91,6 @@
 
   function dishesToDisplay(dishes) {
     return dishes.join("、");
-  }
-
-  function dishesToEditorValue(dishes) {
-    return dishes.join("\n");
-  }
-
-  function editorValueToCombo(value) {
-    return comboToDishes(value).join(" + ");
   }
 
   function render(plan) {
@@ -155,6 +166,39 @@
     window.localStorage.setItem(RECORDS_STORAGE_KEY, JSON.stringify(state.mealRecords));
   }
 
+  function loadCatalogState() {
+    try {
+      const value = window.localStorage.getItem(CATALOG_STORAGE_KEY);
+      const parsed = value ? JSON.parse(value) : {};
+      return {
+        customDishes: normalizeDishList(parsed.customDishes),
+        deletedDishes: normalizeDishList(parsed.deletedDishes),
+      };
+    } catch {
+      return {
+        customDishes: [],
+        deletedDishes: [],
+      };
+    }
+  }
+
+  function normalizeDishList(value) {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  function saveCatalogState() {
+    window.localStorage.setItem(
+      CATALOG_STORAGE_KEY,
+      JSON.stringify({
+        customDishes: state.customDishes,
+        deletedDishes: state.deletedDishes,
+      }),
+    );
+  }
+
   async function copyCurrentPlan() {
     const text = buildShareText(state.currentPlan);
     try {
@@ -181,6 +225,11 @@
   }
 
   function setView(viewName) {
+    state.activeView = viewName;
+    if (viewName !== "catalog") {
+      state.replacementTarget = null;
+    }
+
     viewButtons.forEach((button) => {
       button.classList.toggle("active", button.dataset.view === viewName);
     });
@@ -196,12 +245,28 @@
     if (viewName === "catalog") {
       renderCatalog();
     }
+    if (viewName === "records") {
+      renderRecords();
+    }
   }
 
-  function openDishInCatalog(dish) {
+  function openDishInCatalog(dish, date = state.selectedDate, sourceView = state.activeView) {
     state.selectedDish = dish;
-    catalogSearchInput.value = dish;
+    state.replacementTarget = {
+      date,
+      dish,
+      plan: getReplacementSourcePlan(date, sourceView),
+      sourceView,
+    };
+    catalogSearchInput.value = "";
     setView("catalog");
+  }
+
+  function getReplacementSourcePlan(date, sourceView) {
+    if (sourceView === "today" && state.currentPlan?.date === date) {
+      return state.currentPlan;
+    }
+    return getPlanForDate(date, getEffectivePlan());
   }
 
   function renderYearSelected(date) {
@@ -224,28 +289,10 @@
       }),
     );
 
-    const editor = document.createElement("textarea");
-    editor.id = "yearSelectedCombo";
-    editor.className = "year-combo-editor";
-    editor.rows = Math.max(2, plan.dishes.length);
-    editor.value = dishesToEditorValue(plan.dishes);
-    editor.setAttribute("aria-label", `${plan.date} 菜名`);
-
-    const updateButton = document.createElement("button");
-    updateButton.className = "secondary-button year-update-button";
-    updateButton.id = "yearUpdateButton";
-    updateButton.type = "button";
-    updateButton.textContent = "更新";
-
-    const editBox = document.createElement("div");
-    editBox.className = "year-edit";
-    editBox.append(editor, updateButton);
-
     const children = [
       createTextElement("div", "selected-date", `${plan.date} ${plan.weekday}`),
       dishButtons,
       createTextElement("span", "selected-style", plan.style),
-      editBox,
     ];
     if (repeatedDishes.length) {
       children.splice(3, 0, createTextElement("span", "duplicate-note inline", `已重复：${repeatedDishes.join("、")}`));
@@ -316,9 +363,16 @@
   }
 
   function renderCatalog() {
-    const categories = searchDishPool(DISH_POOL, catalogSearchInput.value);
+    const categories = searchDishPool(getCatalogPool(), catalogSearchInput.value);
     const total = categories.reduce((sum, category) => sum + category.dishes.length, 0);
     catalogCount.textContent = `${total} 道`;
+    if (state.replacementTarget) {
+      catalogHint.hidden = false;
+      catalogHint.textContent = `正在替换：${state.replacementTarget.dish}。点一个菜名即可更新。`;
+    } else {
+      catalogHint.hidden = true;
+      catalogHint.textContent = "";
+    }
     catalogList.replaceChildren(
       ...categories.map((category) => {
         const section = document.createElement("section");
@@ -341,9 +395,21 @@
     grid.className = "catalog-dishes";
     grid.replaceChildren(
       ...dishes.map((dish) => {
-        const chip = createTextElement("span", "catalog-dish", dish);
+        const item = document.createElement("span");
+        item.className = "catalog-dish-item";
+
+        const chip = createTextElement("button", "catalog-dish", dish);
+        chip.type = "button";
+        chip.dataset.dish = dish;
         chip.classList.toggle("selected", isSelectedDish(dish, state.selectedDish));
-        return chip;
+
+        const deleteButton = createTextElement("button", "delete-dish-button", "×");
+        deleteButton.type = "button";
+        deleteButton.dataset.dish = dish;
+        deleteButton.setAttribute("aria-label", `删除 ${dish}`);
+
+        item.append(chip, deleteButton);
+        return item;
       }),
     );
     return grid;
@@ -374,6 +440,7 @@
     render(getPlanForDate(state.selectedDate, getEffectivePlan()));
     renderYearCalendar();
     renderRecords();
+    renderCatalog();
   }
 
   function recordCurrentPlan() {
@@ -395,11 +462,11 @@
         meta.className = "record-meta";
         meta.textContent = `${record.date} ${record.weekday}`;
 
-        const combo = document.createElement("textarea");
-        combo.className = "record-combo";
-        combo.rows = 2;
-        combo.value = dishesToEditorValue(comboToDishes(record.combo));
-        combo.setAttribute("aria-label", `${record.date} 菜名`);
+        const dishes = document.createElement("div");
+        dishes.className = "record-dishes";
+        dishes.replaceChildren(
+          ...comboToDishes(record.combo).map((dish) => createDishButton(dish, "record-dish-button", record.date)),
+        );
 
         const note = document.createElement("textarea");
         note.className = "record-note";
@@ -408,7 +475,7 @@
         note.value = record.note;
         note.setAttribute("aria-label", `${record.date} 备注`);
 
-        row.append(meta, combo, note);
+        row.append(meta, dishes, note);
         return row;
       }),
     );
@@ -419,43 +486,88 @@
   }
 
   function updateRecordField(date, field, value) {
-    const nextValue = field === "combo" ? editorValueToCombo(value) : value;
-    state.mealRecords = updateMealRecord(state.mealRecords, date, { [field]: nextValue });
+    state.mealRecords = updateMealRecord(state.mealRecords, date, { [field]: value });
     saveMealRecords();
     refreshFromRecords();
   }
 
-  function updateYearSelectedPlan() {
-    const editor = yearSelected.querySelector("#yearSelectedCombo");
-    if (!editor) {
+  function replaceTargetDish(newDish) {
+    const target = state.replacementTarget;
+    if (!target) {
+      state.selectedDish = newDish;
+      renderCatalog();
       return;
     }
-    const combo = editorValueToCombo(editor.value);
-    if (!combo) {
+
+    const plan = target.plan ?? getPlanForDate(target.date, getEffectivePlan());
+    const replaced = replaceDishInPlanItem(plan, target.dish, newDish);
+    if (replaced === plan) {
+      showToast("没有找到要替换的菜");
+      return;
+    }
+    const sameFamilies = findSameDishFamilies(replaced.dishes);
+    if (sameFamilies.length) {
+      showToast(`同类了：${sameFamilies[0].dishes.join("、")}`);
+      return;
+    }
+
+    state.mealRecords = upsertMealRecord(state.mealRecords, replaced);
+    state.selectedDate = replaced.date;
+    state.selectedDish = newDish;
+    const returnView = target.sourceView === "catalog" ? "today" : target.sourceView;
+    state.replacementTarget = null;
+    saveMealRecords();
+    refreshFromRecords();
+    setView(returnView || "today");
+    showToast("已替换");
+  }
+
+  function addCustomDishFromInput() {
+    const dish = customDishInput.value.trim();
+    if (!dish) {
       showToast("菜名不能为空");
       return;
     }
+    const bannedTerm = BANNED_TERMS.find((term) => dish.includes(term));
+    if (bannedTerm) {
+      showToast(`忌口：${bannedTerm}`);
+      return;
+    }
 
-    const plan = getPlanForDate(yearDatePicker.value, getEffectivePlan());
-    state.mealRecords = upsertMealRecord(state.mealRecords, { ...plan, combo, dishes: comboToDishes(combo) });
-    saveMealRecords();
-    state.selectedDate = plan.date;
-    refreshFromRecords();
-    showToast("已更新");
+    const wasDeleted = state.deletedDishes.includes(dish);
+    const builtInExists = DISH_POOL.some((category) => category.dishes.includes(dish));
+    const customExists = state.customDishes.includes(dish);
+    if ((builtInExists && !wasDeleted) || customExists) {
+      showToast("菜谱里已有");
+      return;
+    }
+    state.deletedDishes = state.deletedDishes.filter((item) => item !== dish);
+    state.customDishes = builtInExists ? state.customDishes : addCustomDish(state.customDishes, dish);
+    saveCatalogState();
+    customDishInput.value = "";
+    renderCatalog();
+    showToast(wasDeleted ? "已恢复" : "已添加");
   }
 
-  function focusYearEditor(dish) {
-    window.requestAnimationFrame(() => {
-      const editor = yearSelected.querySelector("#yearSelectedCombo");
-      if (!editor) {
-        return;
-      }
-      editor.focus();
-      const start = editor.value.indexOf(dish);
-      if (start >= 0) {
-        editor.setSelectionRange(start, start + dish.length);
-      }
-    });
+  function removeCatalogDish(dish) {
+    const next = removeDishFromPoolState(
+      {
+        customDishes: state.customDishes,
+        deletedDishes: state.deletedDishes,
+      },
+      dish,
+    );
+    state.customDishes = next.customDishes;
+    state.deletedDishes = next.deletedDishes;
+    if (state.selectedDish === dish) {
+      state.selectedDish = "";
+    }
+    if (state.replacementTarget?.dish === dish) {
+      state.replacementTarget = null;
+    }
+    saveCatalogState();
+    renderCatalog();
+    showToast("已删除");
   }
 
   viewButtons.forEach((button) => {
@@ -473,7 +585,7 @@
     if (!button) {
       return;
     }
-    openDishInCatalog(button.dataset.dish);
+    openDishInCatalog(button.dataset.dish, button.dataset.date, "today");
   });
 
   shuffleButton.addEventListener("click", () => {
@@ -506,20 +618,14 @@
     showSelectedDate(row.dataset.date);
     renderYearCalendar();
     if (dishButton) {
-      focusYearEditor(dishButton.dataset.dish);
+      openDishInCatalog(dishButton.dataset.dish, row.dataset.date, "year");
     }
   });
 
   yearSelected.addEventListener("click", (event) => {
-    const updateButton = event.target.closest("#yearUpdateButton");
-    if (updateButton) {
-      updateYearSelectedPlan();
-      return;
-    }
-
     const dishButton = event.target.closest(".selected-dish-button");
     if (dishButton) {
-      focusYearEditor(dishButton.dataset.dish);
+      openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "year");
     }
   });
 
@@ -529,13 +635,36 @@
       return;
     }
     showSelectedDate(dishButton.dataset.date);
-    setView("catalog");
-    openDishInCatalog(dishButton.dataset.dish);
+    openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "today");
   });
 
   catalogSearchInput.addEventListener("input", () => {
-    state.selectedDish = "";
+    if (!state.replacementTarget) {
+      state.selectedDish = "";
+    }
     renderCatalog();
+  });
+
+  catalogList.addEventListener("click", (event) => {
+    const deleteButton = event.target.closest(".delete-dish-button");
+    if (deleteButton) {
+      removeCatalogDish(deleteButton.dataset.dish);
+      return;
+    }
+
+    const dishButton = event.target.closest(".catalog-dish");
+    if (dishButton) {
+      replaceTargetDish(dishButton.dataset.dish);
+    }
+  });
+
+  addDishButton.addEventListener("click", addCustomDishFromInput);
+
+  customDishInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addCustomDishFromInput();
+    }
   });
 
   recordList.addEventListener("change", (event) => {
@@ -544,12 +673,17 @@
       return;
     }
 
-    if (event.target.classList.contains("record-combo")) {
-      updateRecordField(row.dataset.date, "combo", event.target.value);
-    }
     if (event.target.classList.contains("record-note")) {
       updateRecordField(row.dataset.date, "note", event.target.value);
     }
+  });
+
+  recordList.addEventListener("click", (event) => {
+    const dishButton = event.target.closest(".record-dish-button");
+    if (!dishButton) {
+      return;
+    }
+    openDishInCatalog(dishButton.dataset.dish, dishButton.dataset.date, "records");
   });
 
   ruleButton.addEventListener("click", () => {
