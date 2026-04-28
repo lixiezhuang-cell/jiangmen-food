@@ -88,6 +88,46 @@
     deletedDishes: catalogState.deletedDishes,
   };
 
+  function preventPageZoom() {
+    let lastTouchEnd = 0;
+    const preventDefault = (event) => event.preventDefault();
+    const zoomKeys = new Set(["+", "-", "=", "0", "_"]);
+
+    for (const eventName of ["gesturestart", "gesturechange", "gestureend"]) {
+      document.addEventListener(eventName, preventDefault, { passive: false });
+    }
+
+    document.addEventListener(
+      "touchend",
+      (event) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      },
+      { passive: false },
+    );
+
+    document.addEventListener(
+      "wheel",
+      (event) => {
+        if (event.ctrlKey) {
+          event.preventDefault();
+        }
+      },
+      { passive: false },
+    );
+
+    document.addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && zoomKeys.has(event.key)) {
+        event.preventDefault();
+      }
+    });
+  }
+
+  preventPageZoom();
+
   function getEffectivePlan() {
     return applyMealRecordsToPlan(MENU_PLAN, state.mealRecords);
   }

@@ -61,3 +61,13 @@ test("catalog replacement feedback stays visible inside the sheet", () => {
   assert.match(css, /\.toast-pill\s*{[^}]*position:\s*fixed/s);
   assert.match(css, /\.toast-pill\s*{[^}]*z-index:\s*90/s);
 });
+
+test("page disables zoom gestures for app-like mobile use", () => {
+  assert.match(html, /maximum-scale=1/);
+  assert.match(html, /user-scalable=no/);
+  assert.match(css, /html\s*{[^}]*touch-action:\s*manipulation/s);
+  assert.match(css, /input,\s*textarea,\s*select\s*{[^}]*font-size:\s*16px/s);
+  assert.match(appScript, /preventPageZoom/);
+  assert.match(appScript, /gesturestart/);
+  assert.match(appScript, /event\.ctrlKey/);
+});
