@@ -29,6 +29,7 @@ test("dock navigation only keeps today, shuffle, and more", () => {
   assert.ok(dockMatch, "dock navigation exists");
   const labels = [...dockMatch[0].matchAll(/<button[^>]*>([^<]+)<\/button>/g)].map((match) => match[1].trim());
   assert.deepEqual(labels, ["今日", "换一个", "更多"]);
+  assert.match(dockMatch[0], /id="dockShuffleButton"[^>]*class="[^"]*dock-shuffle-button/);
   assert.doesNotMatch(dockMatch[0], /data-view="records"/);
   assert.match(html, /data-sheet-target="records"/);
 });
@@ -39,6 +40,7 @@ test("sheet and dock have transition styles with reduced motion fallback", () =>
   assert.match(css, /\.sheet-overlay\.is-open/);
   assert.match(css, /\.home-week-panel/);
   assert.match(css, /\.shuffle-button/);
+  assert.match(css, /\.dock-shuffle-button/);
   assert.match(css, /@keyframes sheetRise/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });

@@ -102,6 +102,18 @@ button {
   box-shadow: 0 9px 20px rgba(21, 21, 26, 0.18);
 }
 
+.dock-shuffle-button {
+  min-height: 58px;
+  margin-top: -14px;
+  background: linear-gradient(135deg, var(--mint), var(--cyan));
+  color: #061a17;
+  font-size: 16px;
+  font-weight: 850;
+  box-shadow:
+    0 14px 28px rgba(0, 199, 190, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
 .dock-button:active {
   transform: translateY(1px) scale(0.98);
 }
@@ -537,7 +549,8 @@ h1 {
   box-shadow: 0 12px 24px rgba(0, 199, 190, 0.22);
 }
 
-.shuffle-button.is-pulsing {
+.shuffle-button.is-pulsing,
+.dock-shuffle-button.is-pulsing {
   animation: fabPulse 0.42s ease;
 }
 
@@ -1128,6 +1141,11 @@ button:active {
   .dock-button {
     min-height: 38px;
     font-size: 14px;
+  }
+
+  .dock-shuffle-button {
+    min-height: 56px;
+    font-size: 15px;
   }
 
   .year-day {
