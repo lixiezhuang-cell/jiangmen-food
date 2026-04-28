@@ -2,8 +2,8 @@
   const {
     buildShareText,
     formatDate,
-    getAlternatePlan,
     getPlanForDate,
+    getReassignedPlan,
     getWeekPlans,
   } = window.FoodCore;
   const MENU_PLAN = window.MENU_PLAN;
@@ -23,7 +23,7 @@
 
   const state = {
     selectedDate: formatDate(new Date()),
-    alternateOffset: 1,
+    reassignOffset: 1,
     currentPlan: null,
   };
 
@@ -95,15 +95,15 @@
 
   function showSelectedDate(date) {
     state.selectedDate = date;
-    state.alternateOffset = 1;
+    state.reassignOffset = 1;
     render(getPlanForDate(date, MENU_PLAN));
   }
 
   copyButton.addEventListener("click", copyCurrentPlan);
 
   shuffleButton.addEventListener("click", () => {
-    const plan = getAlternatePlan(state.selectedDate, MENU_PLAN, state.alternateOffset);
-    state.alternateOffset += 1;
+    const plan = getReassignedPlan(state.selectedDate, MENU_PLAN, state.reassignOffset);
+    state.reassignOffset += 1;
     render(plan);
   });
 

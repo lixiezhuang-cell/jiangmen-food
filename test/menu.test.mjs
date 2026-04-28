@@ -7,6 +7,7 @@ import {
   buildShareText,
   getAlternatePlan,
   getPlanForDate,
+  getReassignedPlan,
   getWeekPlans,
   validateMenuPlan,
 } from "../src/core.mjs";
@@ -49,6 +50,19 @@ test("alternate plans avoid the same dishes as the source day", () => {
 
   assert.notEqual(alternate.date, source.date);
   assert.equal(alternate.dishes.some((dish) => sourceDishes.has(dish)), false);
+});
+
+test("reassigned plans keep the selected date while replacing its dishes", () => {
+  const source = getPlanForDate("2026-01-01", MENU_PLAN);
+  const reassigned = getReassignedPlan("2026-01-01", MENU_PLAN, 1);
+  const sourceDishes = new Set(source.dishes);
+
+  assert.equal(reassigned.date, source.date);
+  assert.equal(reassigned.weekday, source.weekday);
+  assert.equal(reassigned.dishes.length, source.dishes.length);
+  assert.notEqual(reassigned.combo, source.combo);
+  assert.equal(reassigned.dishes.some((dish) => sourceDishes.has(dish)), false);
+  assert.deepEqual(BANNED_TERMS.filter((term) => reassigned.combo.includes(term)), []);
 });
 
 test("week plans returns a seven-day window starting from the selected date", () => {

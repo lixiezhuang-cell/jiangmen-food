@@ -73,6 +73,46 @@
     return source;
   }
 
+  function hasBannedTerm(text) {
+    return BANNED_TERMS.some((term) => text.includes(term));
+  }
+
+  function pickReplacementDish(plan, sourceIndex, slotIndex, offset, blockedDishes) {
+    for (let distance = offset; distance < plan.length + offset; distance += 1) {
+      const candidate = plan[(sourceIndex + distance) % plan.length].dishes[slotIndex];
+      if (candidate && !blockedDishes.has(candidate) && !hasBannedTerm(candidate)) {
+        return candidate;
+      }
+    }
+
+    for (const item of plan) {
+      for (const candidate of item.dishes) {
+        if (!blockedDishes.has(candidate) && !hasBannedTerm(candidate)) {
+          return candidate;
+        }
+      }
+    }
+
+    throw new Error("No replacement dish available");
+  }
+
+  function getReassignedPlan(value, plan, offset) {
+    const source = getPlanForDate(value, plan);
+    const sourceIndex = plan.findIndex((entry) => entry.date === source.date);
+    const blockedDishes = new Set(source.dishes);
+    const dishes = source.dishes.map((_, slotIndex) => {
+      const dish = pickReplacementDish(plan, sourceIndex, slotIndex, offset + slotIndex * 3, blockedDishes);
+      blockedDishes.add(dish);
+      return dish;
+    });
+
+    return {
+      ...source,
+      dishes,
+      combo: dishes.join(" + "),
+    };
+  }
+
   function getWeekPlans(value, plan) {
     const start = new Date(`${normalizeTo2026(value)}T00:00:00`);
     return Array.from({ length: 7 }, (_, index) => {
@@ -91,6 +131,7 @@
     formatDate,
     getAlternatePlan,
     getPlanForDate,
+    getReassignedPlan,
     getWeekPlans,
     normalizeTo2026,
   };
