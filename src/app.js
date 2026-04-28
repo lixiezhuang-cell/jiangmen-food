@@ -134,7 +134,7 @@
   preventPageZoom();
 
   function getEffectivePlan() {
-    return applyMealRecordsToPlan(applyMenuOverridesToPlan(MENU_PLAN, state.menuOverrides), state.mealRecords);
+    return applyMenuOverridesToPlan(applyMealRecordsToPlan(MENU_PLAN, state.mealRecords), state.menuOverrides);
   }
 
   function getCatalogPool() {

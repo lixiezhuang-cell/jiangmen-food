@@ -84,7 +84,7 @@ test("replacing a future home-list dish keeps the home date in place", () => {
 test("dish replacement uses menu overrides instead of creating future meal records", () => {
   assert.match(appScript, /OVERRIDES_STORAGE_KEY/);
   assert.match(appScript, /menuOverrides:\s*mealData\.menuOverrides/);
-  assert.match(appScript, /applyMenuOverridesToPlan\(MENU_PLAN,\s*state\.menuOverrides\)/);
+  assert.match(appScript, /applyMenuOverridesToPlan\(applyMealRecordsToPlan\(MENU_PLAN,\s*state\.mealRecords\),\s*state\.menuOverrides\)/);
   assert.match(appScript, /migratedFutureRecord/);
   assert.match(appScript, /saveMenuOverrides\(\)/);
   assert.match(appScript, /if \(target\.sourceView === "records"\)/);
