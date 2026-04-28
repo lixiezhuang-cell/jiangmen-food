@@ -1,18 +1,18 @@
 :root {
   color-scheme: light;
-  --ink: #172120;
-  --muted: #66716d;
-  --paper: #f7f3ea;
-  --panel: #fffdf8;
-  --line: #e1d9ca;
-  --green: #173c38;
-  --green-2: #315f51;
-  --coral: #b5533f;
-  --amber: #d5a13d;
-  --wash: #edf4ef;
-  --warm: #fff4df;
-  --shadow: 0 14px 34px rgba(23, 33, 32, 0.1);
-  --soft-shadow: 0 8px 20px rgba(23, 33, 32, 0.07);
+  --ink: #1f2724;
+  --muted: #727b76;
+  --paper: #f7f7f4;
+  --panel: #ffffff;
+  --line: #e3e6e1;
+  --green: #203d39;
+  --green-2: #526862;
+  --coral: #a9574c;
+  --amber: #b88a3c;
+  --wash: #f1f4f1;
+  --warm: #faf7ef;
+  --shadow: 0 10px 24px rgba(31, 39, 36, 0.06);
+  --soft-shadow: 0 5px 14px rgba(31, 39, 36, 0.05);
 }
 
 * {
@@ -22,10 +22,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    linear-gradient(180deg, rgba(255, 244, 223, 0.95), rgba(247, 243, 234, 0.72) 280px),
-    linear-gradient(135deg, rgba(47, 107, 89, 0.08), transparent 42%),
-    var(--paper);
+  background: var(--paper);
   color: var(--ink);
   font-family:
     -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
@@ -49,9 +46,9 @@ button {
 }
 
 .app-shell {
-  width: min(100%, 780px);
+  width: min(100%, 740px);
   margin: 0 auto;
-  padding: max(14px, env(safe-area-inset-top)) 14px calc(94px + env(safe-area-inset-bottom));
+  padding: max(14px, env(safe-area-inset-top)) 12px calc(92px + env(safe-area-inset-bottom));
 }
 
 .view-tabs {
@@ -60,27 +57,27 @@ button {
   bottom: max(10px, env(safe-area-inset-bottom));
   left: auto;
   z-index: 20;
-  width: min(calc(100% - 24px), 740px);
+  width: min(calc(100% - 24px), 700px);
   transform: translateX(50%);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 5px;
+  gap: 2px;
   margin: 0;
-  padding: 5px;
-  border: 1px solid rgba(225, 217, 202, 0.92);
+  padding: 4px;
+  border: 1px solid rgba(227, 230, 225, 0.96);
   border-radius: 8px;
-  background: rgba(255, 253, 248, 0.94);
-  box-shadow: 0 16px 36px rgba(23, 33, 32, 0.16);
-  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 24px rgba(31, 39, 36, 0.1);
+  backdrop-filter: blur(18px);
 }
 
 .view-tab {
-  min-height: 40px;
+  min-height: 42px;
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: var(--green);
-  font-weight: 800;
+  color: var(--muted);
+  font-weight: 750;
   transition:
     background 0.16s ease,
     color 0.16s ease,
@@ -90,7 +87,7 @@ button {
 .view-tab.active {
   background: var(--green);
   color: #fff;
-  box-shadow: 0 6px 14px rgba(23, 60, 56, 0.2);
+  box-shadow: none;
 }
 
 .view-panel[hidden] {
@@ -101,14 +98,14 @@ button {
 .week-panel,
 .records-panel,
 .data-panel {
-  background: rgba(255, 253, 248, 0.96);
-  border: 1px solid rgba(225, 217, 202, 0.92);
+  background: var(--panel);
+  border: 1px solid var(--line);
   border-radius: 8px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--soft-shadow);
 }
 
 .today-panel {
-  padding: 16px;
+  padding: 18px;
 }
 
 .topbar,
@@ -121,10 +118,10 @@ button {
 }
 
 .eyebrow {
-  margin: 0 0 5px;
-  color: var(--coral);
+  margin: 0 0 6px;
+  color: var(--muted);
   font-size: 12px;
-  font-weight: 850;
+  font-weight: 700;
 }
 
 h1,
@@ -134,8 +131,8 @@ p {
 }
 
 h1 {
-  font-size: 34px;
-  line-height: 1.08;
+  font-size: 30px;
+  line-height: 1.12;
   letter-spacing: 0;
 }
 
@@ -143,12 +140,12 @@ h1 {
   width: 40px;
   height: 40px;
   border: 1px solid var(--line);
-  border-radius: 50%;
+  border-radius: 8px;
   background: #fff;
   color: var(--green);
-  font-size: 18px;
-  font-weight: 800;
-  box-shadow: 0 4px 12px rgba(23, 33, 32, 0.06);
+  font-size: 16px;
+  font-weight: 750;
+  box-shadow: none;
 }
 
 .icon-button.small {
@@ -160,27 +157,19 @@ h1 {
 .recommendation {
   position: relative;
   overflow: hidden;
-  margin-top: 18px;
-  padding: 18px;
-  border-radius: 8px;
-  background:
-    linear-gradient(145deg, rgba(23, 60, 56, 0.98), rgba(49, 95, 81, 0.94)),
-    var(--green);
-  color: #fff;
-  min-height: 206px;
+  margin-top: 20px;
+  padding: 16px 0 2px;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  min-height: 160px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 20px;
-  box-shadow: 0 18px 30px rgba(23, 60, 56, 0.2);
-}
-
-.recommendation::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 4px;
-  background: linear-gradient(90deg, var(--amber), var(--coral));
+  gap: 16px;
+  box-shadow: none;
+  border-top: 1px solid var(--line);
+  border-bottom: 0;
 }
 
 .recommendation > * {
@@ -190,17 +179,17 @@ h1 {
 .style-pill {
   width: max-content;
   max-width: 100%;
-  padding: 6px 11px;
+  padding: 5px 9px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.13);
-  color: #f7e6b6;
-  font-size: 13px;
-  font-weight: 850;
+  background: var(--wash);
+  color: var(--green-2);
+  font-size: 12px;
+  font-weight: 750;
 }
 
 .recommendation h2 {
-  font-size: 32px;
-  line-height: 1.18;
+  font-size: 29px;
+  line-height: 1.22;
   letter-spacing: 0;
   word-break: keep-all;
   overflow-wrap: anywhere;
@@ -214,19 +203,18 @@ h1 {
 
 .dish-button {
   min-height: 34px;
-  padding: 8px 11px;
+  padding: 8px 10px;
   border-radius: 999px;
   border: 1px solid var(--line);
   font-size: 14px;
-  font-weight: 850;
+  font-weight: 750;
   line-height: 1.2;
   text-align: left;
 }
 
 .dish-chip {
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: #fff;
+  background: #fff;
+  color: var(--green);
 }
 
 .dish-button.repeated {
@@ -252,7 +240,7 @@ h1 {
   max-width: 100%;
   padding: 6px 9px;
   border-radius: 999px;
-  background: #fff3ec;
+  background: #fff5f1;
   color: var(--coral);
   font-size: 13px;
   font-weight: 800;
@@ -266,8 +254,8 @@ h1 {
 .actions {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 9px;
-  margin-top: 12px;
+  gap: 8px;
+  margin-top: 14px;
 }
 
 .primary-button,
@@ -276,22 +264,23 @@ h1 {
   min-height: 44px;
   border: 0;
   border-radius: 8px;
-  font-weight: 850;
-  box-shadow: 0 8px 14px rgba(23, 33, 32, 0.08);
+  font-weight: 750;
+  box-shadow: none;
 }
 
 .primary-button {
-  background: var(--coral);
+  background: var(--green);
   color: #fff;
 }
 
 .secondary-button {
-  background: var(--amber);
-  color: #1c160b;
+  background: var(--wash);
+  color: var(--green);
+  border: 1px solid var(--line);
 }
 
 .ghost-button {
-  background: var(--wash);
+  background: #fff;
   color: var(--green);
   border: 1px solid var(--line);
 }
@@ -301,10 +290,10 @@ h1 {
   align-items: center;
   gap: 12px;
   margin-top: 14px;
-  padding: 10px 12px;
+  padding: 9px 11px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.72);
+  background: #fff;
   color: var(--muted);
   font-size: 14px;
 }
@@ -317,18 +306,19 @@ h1 {
   padding: 0;
   background: transparent;
   color: var(--ink);
-  font-weight: 800;
+  font-weight: 750;
 }
 
 .week-panel,
 .records-panel,
 .data-panel {
   margin-top: 12px;
-  padding: 15px;
+  padding: 16px;
 }
 
 .section-header h2 {
   font-size: 18px;
+  font-weight: 780;
   letter-spacing: 0;
 }
 
@@ -368,7 +358,7 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0 12px;
-  background: rgba(255, 255, 255, 0.86);
+  background: #fff;
   color: var(--ink);
 }
 
@@ -377,10 +367,10 @@ h1 {
   gap: 7px;
   margin-top: 14px;
   padding: 12px;
-  border: 1px solid rgba(213, 161, 61, 0.38);
-  border-left: 4px solid var(--amber);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--green);
   border-radius: 8px;
-  background: rgba(255, 244, 223, 0.55);
+  background: #fff;
 }
 
 .selected-date,
@@ -409,7 +399,7 @@ h1 {
 .week-dish-button {
   background: #fff;
   color: var(--green);
-  box-shadow: 0 3px 10px rgba(23, 33, 32, 0.04);
+  box-shadow: none;
 }
 
 .year-calendar,
@@ -421,7 +411,7 @@ h1 {
 
 .month-block,
 .catalog-category {
-  border-top: 1px solid rgba(225, 217, 202, 0.92);
+  border-top: 1px solid var(--line);
   padding-top: 11px;
 }
 
@@ -444,7 +434,7 @@ h1 {
   gap: 10px;
   width: 100%;
   min-height: 52px;
-  border-bottom: 1px solid rgba(225, 217, 202, 0.82);
+  border-bottom: 1px solid var(--line);
   color: var(--ink);
   padding: 9px 0;
   text-align: left;
@@ -461,7 +451,7 @@ h1 {
   padding: 0;
   text-align: left;
   font-size: 13px;
-  font-weight: 850;
+  font-weight: 750;
 }
 
 .year-day.selected .year-day-date-button {
@@ -471,11 +461,11 @@ h1 {
 .repeat-tag {
   justify-self: end;
   border-radius: 999px;
-  background: #fff3ec;
+  background: #fff5f1;
   color: var(--coral);
   padding: 5px 8px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 750;
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
@@ -497,7 +487,7 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0 12px;
-  background: rgba(255, 255, 255, 0.86);
+  background: #fff;
   color: var(--ink);
 }
 
@@ -511,10 +501,10 @@ h1 {
   margin-top: 10px;
   padding: 9px 10px;
   border-radius: 8px;
-  background: #fff3ec;
+  background: #fff5f1;
   color: var(--coral);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 750;
 }
 
 .catalog-hint[hidden] {
@@ -540,7 +530,7 @@ h1 {
   background: #fff;
   color: var(--green);
   font-size: 14px;
-  font-weight: 850;
+  font-weight: 750;
   line-height: 1.2;
 }
 
@@ -550,7 +540,7 @@ h1 {
 
 .catalog-dish.selected {
   border-color: var(--coral);
-  background: #fff3ec;
+  background: #fff5f1;
   color: var(--coral);
   font-weight: 800;
 }
@@ -582,7 +572,7 @@ h1 {
   display: grid;
   gap: 8px;
   padding: 12px 0;
-  border-bottom: 1px solid rgba(225, 217, 202, 0.82);
+  border-bottom: 1px solid var(--line);
 }
 
 .record-item:last-child {
@@ -592,7 +582,7 @@ h1 {
 .record-meta {
   color: var(--muted);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 750;
 }
 
 .record-dishes {
@@ -611,7 +601,7 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 9px 10px;
-  background: rgba(255, 255, 255, 0.86);
+  background: #fff;
   color: var(--ink);
   line-height: 1.45;
   resize: vertical;
@@ -633,7 +623,7 @@ h1 {
   grid-template-columns: 86px 1fr;
   gap: 10px;
   padding: 12px 0;
-  border-bottom: 1px solid rgba(225, 217, 202, 0.82);
+  border-bottom: 1px solid var(--line);
 }
 
 .week-item:last-child {
@@ -644,7 +634,7 @@ h1 {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
-  font-weight: 800;
+  font-weight: 750;
 }
 
 .week-combo {
