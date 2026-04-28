@@ -5,6 +5,7 @@ import { DISH_POOL, MENU_PLAN } from "../src/menu-data.mjs";
 import {
   addCustomDish,
   applyMealRecordsToPlan,
+  applyMenuOverridesToPlan,
   BANNED_TERMS,
   buildShareText,
   comboToDishes,
@@ -26,6 +27,7 @@ import {
   sortMealRecords,
   updateMealRecord,
   upsertMealRecord,
+  upsertMenuOverride,
   validateMenuPlan,
 } from "../src/core.mjs";
 
@@ -115,6 +117,20 @@ test("recorded meals override the yearly plan and split dish names", () => {
   assert.deepEqual(updated.dishes, ["手写菜名", "蒜蓉通菜", "沙姜鸡尖"]);
   assert.equal(updated.recorded, true);
   assert.equal(updated.note, "少油");
+});
+
+test("menu overrides change future menus without creating meal records", () => {
+  const plan = getPlanForDate("2026-05-03", MENU_PLAN);
+  const replaced = replaceDishInPlanItem(plan, plan.dishes[0], "豉汁排骨", 0);
+  const overrides = upsertMenuOverride([], replaced);
+  const effectivePlan = applyMealRecordsToPlan(applyMenuOverridesToPlan(MENU_PLAN, overrides), []);
+  const updated = getPlanForDate(plan.date, effectivePlan);
+
+  assert.equal(overrides.length, 1);
+  assert.deepEqual(updated.dishes, replaced.dishes);
+  assert.equal(updated.combo, replaced.combo);
+  assert.equal(updated.recorded, undefined);
+  assert.equal(updated.note, undefined);
 });
 
 test("dish replacement rewrites one dish in a plan item", () => {

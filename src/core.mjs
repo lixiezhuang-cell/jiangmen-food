@@ -348,6 +348,17 @@ export function upsertMealRecord(records, plan) {
   return sortMealRecords([nextRecord, ...withoutCurrent]);
 }
 
+export function upsertMenuOverride(overrides, plan) {
+  const nextOverride = {
+    date: plan.date,
+    weekday: plan.weekday,
+    combo: plan.combo,
+    updatedAt: new Date().toISOString(),
+  };
+  const withoutCurrent = overrides.filter((override) => override.date !== plan.date);
+  return sortMealRecords([nextOverride, ...withoutCurrent]);
+}
+
 export function updateMealRecord(records, date, patch) {
   return sortMealRecords(
     records.map((record) =>
@@ -360,6 +371,25 @@ export function updateMealRecord(records, date, patch) {
         : record,
     ),
   );
+}
+
+export function applyMenuOverridesToPlan(plan, overrides) {
+  const overridesByDate = new Map(overrides.map((override) => [override.date, override]));
+
+  return plan.map((item) => {
+    const override = overridesByDate.get(item.date);
+    if (!override) {
+      return item;
+    }
+
+    const combo = String(override.combo ?? "").trim() || item.combo;
+    const dishes = comboToDishes(combo);
+    return {
+      ...item,
+      combo,
+      dishes: dishes.length ? dishes : item.dishes,
+    };
+  });
 }
 
 export function comboToDishes(combo) {

@@ -2,6 +2,7 @@
   const {
     addCustomDish,
     applyMealRecordsToPlan,
+    applyMenuOverridesToPlan,
     BANNED_TERMS,
     buildShareText,
     comboToDishes,
@@ -21,10 +22,12 @@
     searchMenuPlan,
     updateMealRecord,
     upsertMealRecord,
+    upsertMenuOverride,
   } = window.FoodCore;
   const MENU_PLAN = window.MENU_PLAN;
   const DISH_POOL = window.DISH_POOL;
   const RECORDS_STORAGE_KEY = "jiangmen-food-records";
+  const OVERRIDES_STORAGE_KEY = "jiangmen-food-overrides";
   const CATALOG_STORAGE_KEY = "jiangmen-food-catalog";
 
   const dockButtons = document.querySelectorAll(".dock-button[data-view]");
@@ -74,6 +77,7 @@
   };
 
   const catalogState = loadCatalogState();
+  const mealData = loadMealData();
   const state = {
     activeView: "today",
     selectedDate: formatDate(new Date()),
@@ -83,7 +87,8 @@
     replacementTarget: null,
     catalogFeedback: "",
     catalogEditing: false,
-    mealRecords: loadMealRecords(),
+    mealRecords: mealData.mealRecords,
+    menuOverrides: mealData.menuOverrides,
     customDishes: catalogState.customDishes,
     deletedDishes: catalogState.deletedDishes,
   };
@@ -129,7 +134,7 @@
   preventPageZoom();
 
   function getEffectivePlan() {
-    return applyMealRecordsToPlan(MENU_PLAN, state.mealRecords);
+    return applyMealRecordsToPlan(applyMenuOverridesToPlan(MENU_PLAN, state.menuOverrides), state.mealRecords);
   }
 
   function getCatalogPool() {
@@ -262,17 +267,61 @@
     }, 1500);
   }
 
-  function loadMealRecords() {
+  function readStoredList(storageKey) {
     try {
-      const value = window.localStorage.getItem(RECORDS_STORAGE_KEY);
+      const value = window.localStorage.getItem(storageKey);
       return value ? JSON.parse(value) : [];
     } catch {
       return [];
     }
   }
 
+  function normalizePlanEntries(value) {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value
+      .filter((item) => item && typeof item.date === "string" && typeof item.combo === "string")
+      .map((item) => ({
+        ...item,
+        date: item.date,
+        weekday: item.weekday ?? "",
+        combo: item.combo,
+        note: item.note ?? "",
+      }));
+  }
+
+  function loadMealData() {
+    const today = formatDate(new Date());
+    const storedRecords = normalizePlanEntries(readStoredList(RECORDS_STORAGE_KEY));
+    let menuOverrides = normalizePlanEntries(readStoredList(OVERRIDES_STORAGE_KEY));
+    const mealRecords = [];
+    let migratedFutureRecord = false;
+
+    for (const record of storedRecords) {
+      if (record.date > today) {
+        menuOverrides = upsertMenuOverride(menuOverrides, record);
+        migratedFutureRecord = true;
+      } else {
+        mealRecords.push(record);
+      }
+    }
+
+    if (migratedFutureRecord) {
+      window.localStorage.setItem(RECORDS_STORAGE_KEY, JSON.stringify(mealRecords));
+      window.localStorage.setItem(OVERRIDES_STORAGE_KEY, JSON.stringify(menuOverrides));
+    }
+
+    return { mealRecords, menuOverrides };
+  }
+
   function saveMealRecords() {
     window.localStorage.setItem(RECORDS_STORAGE_KEY, JSON.stringify(state.mealRecords));
+  }
+
+  function saveMenuOverrides() {
+    window.localStorage.setItem(OVERRIDES_STORAGE_KEY, JSON.stringify(state.menuOverrides));
   }
 
   function loadCatalogState() {
@@ -620,6 +669,11 @@
   }
 
   function recordCurrentPlan() {
+    if (state.currentPlan.date > formatDate(new Date())) {
+      showToast("未来日期不能记录");
+      return;
+    }
+
     state.mealRecords = upsertMealRecord(state.mealRecords, state.currentPlan);
     saveMealRecords();
     refreshFromRecords();
@@ -689,13 +743,18 @@
       return;
     }
 
-    state.mealRecords = upsertMealRecord(state.mealRecords, replaced);
+    if (target.sourceView === "records" || state.mealRecords.some((record) => record.date === replaced.date)) {
+      state.mealRecords = upsertMealRecord(state.mealRecords, replaced);
+      saveMealRecords();
+    } else {
+      state.menuOverrides = upsertMenuOverride(state.menuOverrides, replaced);
+      saveMenuOverrides();
+    }
     state.selectedDate = target.returnDate ?? replaced.date;
     state.selectedDish = newDish;
     const returnView = target.sourceView === "catalog" ? "today" : target.sourceView;
     state.replacementTarget = null;
     state.catalogFeedback = "";
-    saveMealRecords();
     refreshFromRecords();
     setView(returnView || "today");
     showToast("已替换");

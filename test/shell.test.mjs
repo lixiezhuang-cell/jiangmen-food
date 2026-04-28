@@ -80,3 +80,18 @@ test("replacing a future home-list dish keeps the home date in place", () => {
   assert.match(appScript, /returnDate:\s*state\.selectedDate/);
   assert.match(appScript, /state\.selectedDate\s*=\s*target\.returnDate\s*\?\?\s*replaced\.date/);
 });
+
+test("dish replacement uses menu overrides instead of creating future meal records", () => {
+  assert.match(appScript, /OVERRIDES_STORAGE_KEY/);
+  assert.match(appScript, /menuOverrides:\s*mealData\.menuOverrides/);
+  assert.match(appScript, /applyMenuOverridesToPlan\(MENU_PLAN,\s*state\.menuOverrides\)/);
+  assert.match(appScript, /migratedFutureRecord/);
+  assert.match(appScript, /saveMenuOverrides\(\)/);
+  assert.match(appScript, /target\.sourceView === "records"/);
+});
+
+test("manual meal records cannot be created for future dates", () => {
+  assert.match(appScript, /function recordCurrentPlan\(\)/);
+  assert.match(appScript, /state\.currentPlan\.date > formatDate\(new Date\(\)\)/);
+  assert.match(appScript, /未来日期不能记录/);
+});
