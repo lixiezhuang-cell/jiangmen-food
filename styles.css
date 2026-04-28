@@ -1,16 +1,18 @@
 :root {
   color-scheme: light;
   --ink: #172120;
-  --muted: #687473;
-  --paper: #fbfaf7;
-  --panel: #ffffff;
-  --line: #dfe7e2;
+  --muted: #66716d;
+  --paper: #f7f3ea;
+  --panel: #fffdf8;
+  --line: #e1d9ca;
   --green: #173c38;
-  --green-2: #2f6b59;
+  --green-2: #315f51;
   --coral: #b5533f;
-  --amber: #d39b35;
-  --wash: #eef5f1;
-  --shadow: 0 16px 42px rgba(23, 33, 32, 0.12);
+  --amber: #d5a13d;
+  --wash: #edf4ef;
+  --warm: #fff4df;
+  --shadow: 0 14px 34px rgba(23, 33, 32, 0.1);
+  --soft-shadow: 0 8px 20px rgba(23, 33, 32, 0.07);
 }
 
 * {
@@ -21,8 +23,8 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    linear-gradient(135deg, rgba(47, 107, 89, 0.13), transparent 36%),
-    linear-gradient(225deg, rgba(181, 83, 63, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(255, 244, 223, 0.95), rgba(247, 243, 234, 0.72) 280px),
+    linear-gradient(135deg, rgba(47, 107, 89, 0.08), transparent 42%),
     var(--paper);
   color: var(--ink);
   font-family:
@@ -36,32 +38,55 @@ textarea {
   font: inherit;
 }
 
+button,
+input,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
 .app-shell {
-  width: min(100%, 760px);
+  width: min(100%, 780px);
   margin: 0 auto;
-  padding: max(18px, env(safe-area-inset-top)) 16px 28px;
+  padding: max(14px, env(safe-area-inset-top)) 14px 30px;
 }
 
 .view-tabs {
+  position: sticky;
+  top: 8px;
+  z-index: 20;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 5px;
+  margin-bottom: 14px;
+  padding: 5px;
+  border: 1px solid rgba(225, 217, 202, 0.92);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.88);
+  box-shadow: var(--soft-shadow);
+  backdrop-filter: blur(14px);
 }
 
 .view-tab {
-  min-height: 42px;
-  border: 1px solid var(--line);
+  min-height: 40px;
+  border: 0;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.82);
+  background: transparent;
   color: var(--green);
   font-weight: 800;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
 .view-tab.active {
   background: var(--green);
   color: #fff;
-  border-color: var(--green);
+  box-shadow: 0 6px 14px rgba(23, 60, 56, 0.2);
 }
 
 .view-panel[hidden] {
@@ -72,14 +97,14 @@ textarea {
 .week-panel,
 .records-panel,
 .data-panel {
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(223, 231, 226, 0.9);
+  background: rgba(255, 253, 248, 0.96);
+  border: 1px solid rgba(225, 217, 202, 0.92);
   border-radius: 8px;
   box-shadow: var(--shadow);
 }
 
 .today-panel {
-  padding: 18px;
+  padding: 16px;
 }
 
 .topbar,
@@ -92,10 +117,10 @@ textarea {
 }
 
 .eyebrow {
-  margin: 0 0 4px;
+  margin: 0 0 5px;
   color: var(--coral);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 850;
 }
 
 h1,
@@ -105,20 +130,21 @@ p {
 }
 
 h1 {
-  font-size: clamp(30px, 8vw, 48px);
-  line-height: 1.05;
+  font-size: 34px;
+  line-height: 1.08;
   letter-spacing: 0;
 }
 
 .icon-button {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border: 1px solid var(--line);
   border-radius: 50%;
-  background: var(--wash);
+  background: #fff;
   color: var(--green);
   font-size: 18px;
   font-weight: 800;
+  box-shadow: 0 4px 12px rgba(23, 33, 32, 0.06);
 }
 
 .icon-button.small {
@@ -128,34 +154,49 @@ h1 {
 }
 
 .recommendation {
-  margin-top: 22px;
+  position: relative;
+  overflow: hidden;
+  margin-top: 18px;
   padding: 18px;
   border-radius: 8px;
   background:
-    linear-gradient(135deg, rgba(23, 60, 56, 0.96), rgba(47, 107, 89, 0.93)),
+    linear-gradient(145deg, rgba(23, 60, 56, 0.98), rgba(49, 95, 81, 0.94)),
     var(--green);
   color: #fff;
-  min-height: 210px;
+  min-height: 206px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 18px;
+  gap: 20px;
+  box-shadow: 0 18px 30px rgba(23, 60, 56, 0.2);
+}
+
+.recommendation::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--amber), var(--coral));
+}
+
+.recommendation > * {
+  position: relative;
 }
 
 .style-pill {
   width: max-content;
   max-width: 100%;
-  padding: 6px 10px;
+  padding: 6px 11px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.13);
   color: #f7e6b6;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 850;
 }
 
 .recommendation h2 {
-  font-size: clamp(24px, 7vw, 42px);
-  line-height: 1.2;
+  font-size: 32px;
+  line-height: 1.18;
   letter-spacing: 0;
   word-break: keep-all;
   overflow-wrap: anywhere;
@@ -168,11 +209,12 @@ h1 {
 }
 
 .dish-button {
-  padding: 8px 10px;
+  min-height: 34px;
+  padding: 8px 11px;
   border-radius: 999px;
   border: 1px solid var(--line);
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 850;
   line-height: 1.2;
   text-align: left;
 }
@@ -219,18 +261,19 @@ h1 {
 
 .actions {
   display: grid;
-  grid-template-columns: 1.1fr 1fr 1fr 0.8fr;
-  gap: 10px;
-  margin-top: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+  margin-top: 12px;
 }
 
 .primary-button,
 .secondary-button,
 .ghost-button {
-  min-height: 46px;
+  min-height: 44px;
   border: 0;
   border-radius: 8px;
-  font-weight: 800;
+  font-weight: 850;
+  box-shadow: 0 8px 14px rgba(23, 33, 32, 0.08);
 }
 
 .primary-button {
@@ -254,25 +297,30 @@ h1 {
   align-items: center;
   gap: 12px;
   margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
   color: var(--muted);
   font-size: 14px;
 }
 
 .date-row input {
   flex: 1;
-  min-height: 42px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0 12px;
-  background: #fff;
+  min-height: 34px;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
   color: var(--ink);
+  font-weight: 800;
 }
 
 .week-panel,
 .records-panel,
 .data-panel {
-  margin-top: 14px;
-  padding: 16px;
+  margin-top: 12px;
+  padding: 15px;
 }
 
 .section-header h2 {
@@ -290,7 +338,7 @@ h1 {
 .filter-row {
   display: grid;
   grid-template-columns: minmax(140px, 0.8fr) minmax(0, 1.2fr);
-  gap: 10px;
+  gap: 9px;
   margin-top: 12px;
 }
 
@@ -299,21 +347,24 @@ h1 {
 }
 
 .filter-row input {
-  min-height: 42px;
+  min-height: 44px;
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0 12px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.86);
   color: var(--ink);
 }
 
 .selected-day {
   display: grid;
-  gap: 5px;
+  gap: 7px;
   margin-top: 14px;
-  padding: 12px 0 12px 12px;
+  padding: 12px;
+  border: 1px solid rgba(213, 161, 61, 0.38);
   border-left: 4px solid var(--amber);
+  border-radius: 8px;
+  background: rgba(255, 244, 223, 0.55);
 }
 
 .selected-date,
@@ -340,32 +391,34 @@ h1 {
 .selected-dish-button,
 .year-dish-button,
 .week-dish-button {
-  background: var(--wash);
+  background: #fff;
   color: var(--green);
+  box-shadow: 0 3px 10px rgba(23, 33, 32, 0.04);
 }
 
 .year-calendar,
 .catalog-list {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   margin-top: 14px;
 }
 
 .month-block,
 .catalog-category {
-  border-top: 1px solid var(--line);
-  padding-top: 12px;
+  border-top: 1px solid rgba(225, 217, 202, 0.92);
+  padding-top: 11px;
 }
 
 .month-block h3,
 .catalog-category h3 {
-  margin: 0 0 8px;
-  font-size: 17px;
+  margin: 0 0 9px;
+  font-size: 16px;
+  color: var(--green);
 }
 
 .month-days {
   display: grid;
-  gap: 7px;
+  gap: 4px;
 }
 
 .year-day {
@@ -374,10 +427,10 @@ h1 {
   align-items: center;
   gap: 10px;
   width: 100%;
-  min-height: 48px;
-  border-bottom: 1px solid var(--line);
+  min-height: 52px;
+  border-bottom: 1px solid rgba(225, 217, 202, 0.82);
   color: var(--ink);
-  padding: 8px 0;
+  padding: 9px 0;
   text-align: left;
 }
 
@@ -392,7 +445,7 @@ h1 {
   padding: 0;
   text-align: left;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 850;
 }
 
 .year-day.selected .year-day-date-button {
@@ -414,23 +467,23 @@ h1 {
 .catalog-editor {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
+  gap: 9px;
   margin-top: 10px;
 }
 
 .catalog-editor input {
-  min-height: 42px;
+  min-height: 44px;
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0 12px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.86);
   color: var(--ink);
 }
 
 .catalog-editor .secondary-button {
   min-width: 82px;
-  min-height: 42px;
+  min-height: 44px;
   padding: 0 16px;
 }
 
@@ -451,7 +504,7 @@ h1 {
 .catalog-dishes {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 7px;
 }
 
 .catalog-dish-item {
@@ -460,13 +513,14 @@ h1 {
 }
 
 .catalog-dish {
-  padding: 7px 9px;
+  min-height: 34px;
+  padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: 999px 0 0 999px;
-  background: var(--wash);
+  background: #fff;
   color: var(--green);
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 850;
   line-height: 1.2;
 }
 
@@ -478,7 +532,7 @@ h1 {
 }
 
 .delete-dish-button {
-  min-width: 31px;
+  min-width: 32px;
   border: 1px solid var(--line);
   border-left: 0;
   border-radius: 0 999px 999px 0;
@@ -496,15 +550,15 @@ h1 {
 
 .record-list {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   margin-top: 12px;
 }
 
 .record-item {
   display: grid;
   gap: 8px;
-  padding: 11px 0;
-  border-bottom: 1px solid var(--line);
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(225, 217, 202, 0.82);
 }
 
 .record-item:last-child {
@@ -514,7 +568,7 @@ h1 {
 .record-meta {
   color: var(--muted);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .record-dishes {
@@ -524,7 +578,7 @@ h1 {
 }
 
 .record-dish-button {
-  background: var(--wash);
+  background: #fff;
   color: var(--green);
 }
 
@@ -533,7 +587,7 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 9px 10px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.86);
   color: var(--ink);
   line-height: 1.45;
   resize: vertical;
@@ -546,7 +600,7 @@ h1 {
 
 .week-list {
   display: grid;
-  gap: 8px;
+  gap: 4px;
   margin-top: 12px;
 }
 
@@ -554,8 +608,8 @@ h1 {
   display: grid;
   grid-template-columns: 86px 1fr;
   gap: 10px;
-  padding: 11px 0;
-  border-bottom: 1px solid var(--line);
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(225, 217, 202, 0.82);
 }
 
 .week-item:last-child {
@@ -566,6 +620,7 @@ h1 {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
+  font-weight: 800;
 }
 
 .week-combo {
@@ -606,7 +661,41 @@ button:active {
   transform: translateY(1px);
 }
 
+@media (min-width: 640px) {
+  .app-shell {
+    padding-inline: 18px;
+  }
+
+  .today-panel {
+    padding: 18px;
+  }
+
+  h1 {
+    font-size: 40px;
+  }
+
+  .recommendation {
+    padding: 20px;
+  }
+
+  .recommendation h2 {
+    font-size: 38px;
+  }
+}
+
 @media (max-width: 420px) {
+  .app-shell {
+    padding-inline: 12px;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+
+  .recommendation h2 {
+    font-size: 28px;
+  }
+
   .actions {
     grid-template-columns: 1fr 1fr;
   }
@@ -625,6 +714,7 @@ button:active {
 
   .view-tabs {
     gap: 6px;
+    top: 6px;
   }
 
   .view-tab {
