@@ -3,16 +3,23 @@ import { test } from "node:test";
 
 import { DISH_POOL, MENU_PLAN } from "../src/menu-data.mjs";
 import {
+  applyMealRecordsToPlan,
   BANNED_TERMS,
   buildShareText,
+  comboToDishes,
+  findTenDayDuplicateDishes,
   findSameDishFamilies,
   getAlternatePlan,
   getPlanForDate,
   getReassignedPlan,
   getWeekPlans,
   groupPlansByMonth,
+  isSelectedDish,
   searchMenuPlan,
   searchDishPool,
+  sortMealRecords,
+  updateMealRecord,
+  upsertMealRecord,
   validateMenuPlan,
 } from "../src/core.mjs";
 
@@ -46,6 +53,93 @@ test("total dish pool search filters categories and dishes", () => {
   assert.ok(results.every((category) => category.dishes.every((dish) => dish.includes("青口"))));
   assert.ok(results.some((category) => category.dishes.includes("蒜蓉蒸青口")));
   assert.equal(searchDishPool(DISH_POOL, "  ").length, DISH_POOL.length);
+});
+
+test("catalog selection highlights only the exact dish name", () => {
+  assert.equal(isSelectedDish("豉汁排骨", "豉汁排骨"), true);
+  assert.equal(isSelectedDish("豉汁排骨", "排骨"), false);
+  assert.equal(isSelectedDish("豉汁蒸排骨", "豉汁排骨"), false);
+});
+
+test("meal records can be created and edited by date", () => {
+  const plan = getPlanForDate("2026-01-01", MENU_PLAN);
+  const created = upsertMealRecord([], plan);
+  const updatedSameDate = upsertMealRecord(created, {
+    ...plan,
+    combo: "铁板牛肉 + 蒜蓉通菜",
+  });
+  const edited = updateMealRecord(updatedSameDate, plan.date, {
+    combo: "手写菜名",
+    note: "少油，配啤酒",
+  });
+  const updatedAfterNote = upsertMealRecord(edited, {
+    ...plan,
+    combo: "今日重新点的菜",
+  });
+
+  assert.equal(created.length, 1);
+  assert.equal(updatedSameDate.length, 1);
+  assert.equal(updatedSameDate[0].combo, "铁板牛肉 + 蒜蓉通菜");
+  assert.equal(edited[0].combo, "手写菜名");
+  assert.equal(edited[0].note, "少油，配啤酒");
+  assert.equal(updatedAfterNote.length, 1);
+  assert.equal(updatedAfterNote[0].combo, "今日重新点的菜");
+  assert.equal(updatedAfterNote[0].note, "少油，配啤酒");
+  assert.deepEqual(sortMealRecords([{ date: "2026-01-01" }, { date: "2026-01-03" }]).map((item) => item.date), [
+    "2026-01-03",
+    "2026-01-01",
+  ]);
+});
+
+test("recorded meals override the yearly plan and split dish names", () => {
+  const plan = getPlanForDate("2026-01-01", MENU_PLAN);
+  const records = [
+    {
+      date: plan.date,
+      weekday: plan.weekday,
+      combo: "手写菜名、蒜蓉通菜\n沙姜鸡尖",
+      note: "少油",
+    },
+  ];
+  const effectivePlan = applyMealRecordsToPlan(MENU_PLAN, records);
+  const updated = getPlanForDate(plan.date, effectivePlan);
+
+  assert.deepEqual(comboToDishes(records[0].combo), ["手写菜名", "蒜蓉通菜", "沙姜鸡尖"]);
+  assert.equal(updated.combo, records[0].combo);
+  assert.deepEqual(updated.dishes, ["手写菜名", "蒜蓉通菜", "沙姜鸡尖"]);
+  assert.equal(updated.recorded, true);
+  assert.equal(updated.note, "少油");
+});
+
+test("duplicate dish markers include both dates within a ten day window", () => {
+  const plan = [
+    {
+      date: "2026-01-01",
+      weekday: "周四",
+      combo: "豉汁排骨 + 蒜蓉通菜",
+      dishes: ["豉汁排骨", "蒜蓉通菜"],
+      style: "大排档",
+    },
+    {
+      date: "2026-01-08",
+      weekday: "周四",
+      combo: "沙姜鸡尖 + 蒜蓉通菜",
+      dishes: ["沙姜鸡尖", "蒜蓉通菜"],
+      style: "下酒",
+    },
+    {
+      date: "2026-01-20",
+      weekday: "周二",
+      combo: "椒盐鱼骨 + 蒜蓉通菜",
+      dishes: ["椒盐鱼骨", "蒜蓉通菜"],
+      style: "鱼档",
+    },
+  ];
+
+  assert.deepEqual(findTenDayDuplicateDishes(plan), {
+    "2026-01-01": ["蒜蓉通菜"],
+    "2026-01-08": ["蒜蓉通菜"],
+  });
 });
 
 test("menu data covers every day of 2026", () => {

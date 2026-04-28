@@ -147,6 +147,101 @@
       .filter((category) => category.dishes.length > 0);
   }
 
+  function isSelectedDish(dish, selectedDish) {
+    return selectedDish.trim() !== "" && dish === selectedDish;
+  }
+
+  function sortMealRecords(records) {
+    return [...records].sort((left, right) => right.date.localeCompare(left.date));
+  }
+
+  function upsertMealRecord(records, plan) {
+    const existing = records.find((record) => record.date === plan.date);
+    const nextRecord = {
+      date: plan.date,
+      weekday: plan.weekday,
+      combo: plan.combo,
+      note: existing?.note ?? "",
+      updatedAt: new Date().toISOString(),
+    };
+    const withoutCurrent = records.filter((record) => record.date !== plan.date);
+    return sortMealRecords([nextRecord, ...withoutCurrent]);
+  }
+
+  function updateMealRecord(records, date, patch) {
+    return sortMealRecords(
+      records.map((record) =>
+        record.date === date
+          ? {
+              ...record,
+              ...patch,
+              updatedAt: new Date().toISOString(),
+            }
+          : record,
+      ),
+    );
+  }
+
+  function comboToDishes(combo) {
+    return String(combo ?? "")
+      .split(/\s*(?:\+|、|，|,|\/|；|;|\n+)\s*/)
+      .map((dish) => dish.trim())
+      .filter(Boolean);
+  }
+
+  function applyMealRecordsToPlan(plan, records) {
+    const recordsByDate = new Map(records.map((record) => [record.date, record]));
+
+    return plan.map((item) => {
+      const record = recordsByDate.get(item.date);
+      if (!record) {
+        return item;
+      }
+
+      const combo = String(record.combo ?? "").trim() || item.combo;
+      const dishes = comboToDishes(combo);
+      return {
+        ...item,
+        combo,
+        dishes: dishes.length ? dishes : item.dishes,
+        note: record.note ?? "",
+        recorded: true,
+      };
+    });
+  }
+
+  function addDuplicateDish(duplicates, date, dish) {
+    if (!duplicates.has(date)) {
+      duplicates.set(date, new Set());
+    }
+    duplicates.get(date).add(dish);
+  }
+
+  function findTenDayDuplicateDishes(plan) {
+    const duplicates = new Map();
+
+    for (let index = 0; index < plan.length; index += 1) {
+      const currentDishes = new Set(plan[index].dishes.map((dish) => dish.trim()).filter(Boolean));
+      const currentDate = new Date(`${plan[index].date}T00:00:00`);
+      for (let previous = 0; previous < index; previous += 1) {
+        const previousDate = new Date(`${plan[previous].date}T00:00:00`);
+        const daysBetween = Math.abs((currentDate.getTime() - previousDate.getTime()) / MS_PER_DAY);
+        if (daysBetween > 10) {
+          continue;
+        }
+        for (const dish of plan[previous].dishes) {
+          const normalized = dish.trim();
+          if (normalized && currentDishes.has(normalized)) {
+            addDuplicateDish(duplicates, plan[previous].date, normalized);
+            addDuplicateDish(duplicates, plan[index].date, normalized);
+          }
+        }
+      }
+    }
+
+    return Object.fromEntries([...duplicates.entries()].map(([date, dishes]) => [date, [...dishes]]));
+  }
+
   function searchMenuPlan(plan, query) {
     const normalized = query.trim().toLowerCase();
     if (!normalized) {
@@ -283,8 +378,11 @@
   }
 
   window.FoodCore = {
+    applyMealRecordsToPlan,
     BANNED_TERMS,
     buildShareText,
+    comboToDishes,
+    findTenDayDuplicateDishes,
     findSameDishFamilies,
     formatDate,
     getDishFamilies,
@@ -293,8 +391,12 @@
     getReassignedPlan,
     getWeekPlans,
     groupPlansByMonth,
+    isSelectedDish,
     normalizeTo2026,
     searchMenuPlan,
     searchDishPool,
+    sortMealRecords,
+    updateMealRecord,
+    upsertMealRecord,
   };
 })();

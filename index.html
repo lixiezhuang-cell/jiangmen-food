@@ -28,12 +28,14 @@
           <article class="recommendation" aria-live="polite">
             <div class="style-pill" id="styleLabel">江门广式</div>
             <h2 id="comboTitle">加载中</h2>
+            <div class="duplicate-note" id="duplicateNote" hidden></div>
             <div class="dish-list" id="dishList"></div>
           </article>
 
           <div class="actions">
             <button class="primary-button" id="copyButton" type="button">复制</button>
             <button class="secondary-button" id="shuffleButton" type="button">换一个</button>
+            <button class="secondary-button" id="recordButton" type="button">记录</button>
             <button class="ghost-button" id="todayButton" type="button">今天</button>
           </div>
 
@@ -49,6 +51,14 @@
             <span id="toast" role="status"></span>
           </div>
           <div class="week-list" id="weekList"></div>
+        </section>
+
+        <section class="records-panel" aria-labelledby="records-title">
+          <div class="section-header">
+            <h2 id="records-title">日期记录表</h2>
+            <span id="recordCount"></span>
+          </div>
+          <div class="record-list" id="recordList"></div>
         </section>
       </section>
 

@@ -31,7 +31,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -69,6 +70,7 @@ input {
 
 .today-panel,
 .week-panel,
+.records-panel,
 .data-panel {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(223, 231, 226, 0.9);
@@ -165,17 +167,59 @@ h1 {
   gap: 8px;
 }
 
-.dish-chip {
+.dish-button {
   padding: 8px 10px;
   border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.dish-chip {
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  font-size: 14px;
+  color: #fff;
+}
+
+.dish-button.repeated {
+  border-color: var(--coral);
+  background: #fff3ec;
+  color: var(--coral);
+}
+
+.dish-chip.repeated {
+  background: rgba(255, 243, 236, 0.95);
+}
+
+.dish-button.repeated::after {
+  content: "已重复";
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--coral);
+}
+
+.duplicate-note {
+  width: max-content;
+  max-width: 100%;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #fff3ec;
+  color: var(--coral);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.duplicate-note.inline {
+  width: fit-content;
+  margin-top: 2px;
 }
 
 .actions {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 0.8fr;
+  grid-template-columns: 1.1fr 1fr 1fr 0.8fr;
   gap: 10px;
   margin-top: 14px;
 }
@@ -225,6 +269,7 @@ h1 {
 }
 
 .week-panel,
+.records-panel,
 .data-panel {
   margin-top: 14px;
   padding: 16px;
@@ -284,6 +329,45 @@ h1 {
   line-height: 1.35;
 }
 
+.selected-dish-list,
+.year-day-dishes,
+.week-dishes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.selected-dish-button,
+.year-dish-button,
+.week-dish-button {
+  background: var(--wash);
+  color: var(--green);
+}
+
+.year-edit {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.year-combo-editor {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: #fff;
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.year-update-button {
+  justify-self: start;
+  min-width: 92px;
+  padding: 0 18px;
+}
+
 .year-calendar,
 .catalog-list {
   display: grid;
@@ -315,9 +399,7 @@ h1 {
   gap: 10px;
   width: 100%;
   min-height: 48px;
-  border: 0;
   border-bottom: 1px solid var(--line);
-  background: transparent;
   color: var(--ink);
   padding: 8px 0;
   text-align: left;
@@ -327,9 +409,29 @@ h1 {
   color: var(--coral);
 }
 
-.year-day-combo {
-  min-width: 0;
-  line-height: 1.35;
+.year-day-date-button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 0;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.year-day.selected .year-day-date-button {
+  color: var(--coral);
+}
+
+.repeat-tag {
+  justify-self: end;
+  border-radius: 999px;
+  background: #fff3ec;
+  color: var(--coral);
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
   overflow-wrap: anywhere;
 }
 
@@ -346,6 +448,52 @@ h1 {
   background: var(--wash);
   font-size: 14px;
   line-height: 1.2;
+}
+
+.catalog-dish.selected {
+  border-color: var(--coral);
+  background: #fff3ec;
+  color: var(--coral);
+  font-weight: 800;
+}
+
+.record-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.record-item {
+  display: grid;
+  gap: 8px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.record-item:last-child {
+  border-bottom: 0;
+}
+
+.record-meta {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.record-combo,
+.record-note {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: #fff;
+  color: var(--ink);
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.record-combo {
+  font-weight: 700;
 }
 
 .empty-state {
@@ -421,7 +569,7 @@ button:active {
   }
 
   .ghost-button {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
 
   .week-item {
@@ -436,7 +584,12 @@ button:active {
     grid-template-columns: 64px 1fr;
   }
 
-  .year-day-style {
+  .year-day-style,
+  .repeat-tag {
     grid-column: 2;
+  }
+
+  .repeat-tag {
+    justify-self: start;
   }
 }
