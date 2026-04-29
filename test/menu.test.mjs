@@ -393,6 +393,14 @@ test("smart reassigned plans prefer unrecorded pairings without nearby duplicate
   assert.deepEqual(findSameDishFamilies(reassigned.dishes), []);
 });
 
+test("smart reassigned plans rotate through different options as offset changes", () => {
+  const combos = Array.from({ length: 6 }, (_, index) =>
+    getSmartReassignedPlan("2026-04-29", MENU_PLAN, index + 1, []).combo,
+  );
+
+  assert.ok(new Set(combos).size >= 4, combos.join(" | "));
+});
+
 test("week plans returns a ten-day window starting from the selected date", () => {
   const week = getWeekPlans("2026-02-26", MENU_PLAN);
 

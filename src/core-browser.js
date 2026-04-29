@@ -666,22 +666,24 @@
   function getSmartReassignedPlan(value, plan, offset = 1, records = []) {
     const source = getPlanForDate(value, plan);
     const sourceIndex = plan.findIndex((entry) => entry.date === source.date);
-    let bestCandidate = null;
-    let bestScore = Number.NEGATIVE_INFINITY;
+    const rankedCandidates = [];
 
     for (let rank = 0; rank < plan.length - 1; rank += 1) {
-      const distance = offset + rank;
+      const distance = rank + 1;
       const candidate = plan[(sourceIndex + distance) % plan.length];
       const score = scoreSmartCandidate(candidate, source, plan, records, rank, offset);
-      if (score > bestScore) {
-        bestScore = score;
-        bestCandidate = candidate;
+      if (score > Number.NEGATIVE_INFINITY) {
+        rankedCandidates.push({ candidate, rank, score });
       }
     }
 
-    if (!bestCandidate) {
+    if (!rankedCandidates.length) {
       return getReassignedPlan(value, plan, offset);
     }
+
+    rankedCandidates.sort((left, right) => right.score - left.score || left.rank - right.rank);
+    const candidateIndex = (Math.max(1, Math.trunc(Number(offset) || 1)) - 1) % rankedCandidates.length;
+    const bestCandidate = rankedCandidates[candidateIndex].candidate;
 
     return {
       ...source,
