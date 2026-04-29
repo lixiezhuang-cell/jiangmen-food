@@ -140,6 +140,24 @@
       </form>
     </dialog>
 
+    <dialog id="shuffleDialog" class="shuffle-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="dialog-eyebrow" id="shuffleDialogDate">今日</p>
+            <h2>换成这组？</h2>
+          </div>
+          <button class="icon-button small" value="cancel" aria-label="关闭">×</button>
+        </div>
+        <div class="shuffle-dialog-dishes" id="shuffleDialogDishes"></div>
+        <div class="shuffle-dialog-actions">
+          <button class="ghost-button" id="shuffleRefreshButton" type="button">再换一个</button>
+          <button class="secondary-button" value="cancel" type="submit">取消</button>
+          <button class="primary-button" id="shuffleConfirmButton" type="button">确认替换</button>
+        </div>
+      </form>
+    </dialog>
+
     <script src="./src/menu-data.js"></script>
     <script src="./src/core-browser.js"></script>
     <script src="./src/app.js"></script>

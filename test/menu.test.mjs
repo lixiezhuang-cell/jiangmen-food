@@ -25,6 +25,7 @@ import {
   searchMenuPlan,
   searchDishPool,
   sortMealRecords,
+  syncPlanReplacementState,
   updateMealRecord,
   upsertMealRecord,
   upsertMenuOverride,
@@ -131,6 +132,39 @@ test("menu overrides change future menus without creating meal records", () => {
   assert.equal(updated.combo, replaced.combo);
   assert.equal(updated.recorded, undefined);
   assert.equal(updated.note, undefined);
+});
+
+test("dish replacement state syncs menu pages and existing records by date", () => {
+  const plan = getPlanForDate("2026-05-03", MENU_PLAN);
+  const existingRecord = {
+    date: plan.date,
+    weekday: plan.weekday,
+    combo: plan.combo,
+    note: "少油",
+  };
+  const replaced = replaceDishInPlanItem(plan, plan.dishes[0], "豉汁排骨", 0);
+  const synced = syncPlanReplacementState(
+    {
+      mealRecords: [existingRecord],
+      menuOverrides: [],
+    },
+    replaced,
+  );
+  const unrecorded = syncPlanReplacementState(
+    {
+      mealRecords: [],
+      menuOverrides: [],
+    },
+    replaced,
+  );
+
+  assert.equal(synced.menuOverrides.length, 1);
+  assert.equal(synced.menuOverrides[0].combo, replaced.combo);
+  assert.equal(synced.mealRecords.length, 1);
+  assert.equal(synced.mealRecords[0].combo, replaced.combo);
+  assert.equal(synced.mealRecords[0].note, "少油");
+  assert.equal(unrecorded.menuOverrides.length, 1);
+  assert.equal(unrecorded.mealRecords.length, 0);
 });
 
 test("dish replacement rewrites one dish in a plan item", () => {

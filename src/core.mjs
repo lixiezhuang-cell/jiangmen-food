@@ -359,6 +359,17 @@ export function upsertMenuOverride(overrides, plan) {
   return sortMealRecords([nextOverride, ...withoutCurrent]);
 }
 
+export function syncPlanReplacementState(state, plan) {
+  const mealRecords = state.mealRecords ?? [];
+  const menuOverrides = state.menuOverrides ?? [];
+  const hasMealRecord = mealRecords.some((record) => record.date === plan.date);
+
+  return {
+    mealRecords: hasMealRecord ? upsertMealRecord(mealRecords, plan) : mealRecords,
+    menuOverrides: upsertMenuOverride(menuOverrides, plan),
+  };
+}
+
 export function updateMealRecord(records, date, patch) {
   return sortMealRecords(
     records.map((record) =>

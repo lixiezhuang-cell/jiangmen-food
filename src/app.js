@@ -20,6 +20,7 @@
     replaceDishInPlanItem,
     searchDishPool,
     searchMenuPlan,
+    syncPlanReplacementState,
     updateMealRecord,
     upsertMealRecord,
     upsertMenuOverride,
@@ -53,6 +54,11 @@
   const recordButton = document.querySelector("#recordButton");
   const todayButton = document.querySelector("#todayButton");
   const ruleDialog = document.querySelector("#ruleDialog");
+  const shuffleDialog = document.querySelector("#shuffleDialog");
+  const shuffleDialogDate = document.querySelector("#shuffleDialogDate");
+  const shuffleDialogDishes = document.querySelector("#shuffleDialogDishes");
+  const shuffleRefreshButton = document.querySelector("#shuffleRefreshButton");
+  const shuffleConfirmButton = document.querySelector("#shuffleConfirmButton");
   const yearDatePicker = document.querySelector("#yearDatePicker");
   const yearSearchInput = document.querySelector("#yearSearchInput");
   const yearSelected = document.querySelector("#yearSelected");
@@ -85,6 +91,8 @@
     currentPlan: null,
     selectedDish: "",
     replacementTarget: null,
+    pendingShufflePlan: null,
+    pendingShuffleTrigger: null,
     catalogFeedback: "",
     catalogEditing: false,
     mealRecords: mealData.mealRecords,
@@ -488,7 +496,28 @@
     setView("catalog");
   }
 
+  function getRecordPlanForDate(date) {
+    const record = state.mealRecords.find((record) => record.date === date);
+    if (!record) {
+      return null;
+    }
+
+    const basePlan = getPlanForDate(date, getEffectivePlan());
+    const combo = String(record.combo ?? "").trim() || basePlan.combo;
+    const dishes = comboToDishes(combo);
+    return {
+      ...basePlan,
+      ...record,
+      combo,
+      dishes: dishes.length ? dishes : basePlan.dishes,
+      recorded: true,
+    };
+  }
+
   function getReplacementSourcePlan(date, sourceView) {
+    if (sourceView === "records") {
+      return getRecordPlanForDate(date) ?? getPlanForDate(date, getEffectivePlan());
+    }
     if (sourceView === "today" && state.currentPlan?.date === date) {
       return state.currentPlan;
     }
@@ -759,13 +788,11 @@
       return;
     }
 
-    if (target.sourceView === "records") {
-      state.mealRecords = upsertMealRecord(state.mealRecords, replaced);
-      saveMealRecords();
-    } else {
-      state.menuOverrides = upsertMenuOverride(state.menuOverrides, replaced);
-      saveMenuOverrides();
-    }
+    const syncedState = syncPlanReplacementState(state, replaced);
+    state.mealRecords = syncedState.mealRecords;
+    state.menuOverrides = syncedState.menuOverrides;
+    saveMealRecords();
+    saveMenuOverrides();
     state.selectedDate = target.returnDate ?? replaced.date;
     state.selectedDish = newDish;
     const returnView = target.sourceView === "catalog" ? "today" : target.sourceView;
@@ -837,16 +864,79 @@
     recommendation.classList.add("is-changing");
   }
 
-  function shuffleCurrentPlan(triggerButton) {
-    closeSheet();
+  function getNextShufflePlan() {
     const plan = getSmartReassignedPlan(state.selectedDate, getEffectivePlan(), state.reassignOffset, state.mealRecords);
     state.reassignOffset += 1;
-    render(plan);
-    animateRecommendationChange();
+    return plan;
+  }
+
+  function pulseShuffleButton(triggerButton) {
+    if (!triggerButton) {
+      return;
+    }
     triggerButton.classList.remove("is-pulsing");
     void triggerButton.offsetWidth;
     triggerButton.classList.add("is-pulsing");
   }
+
+  function renderShuffleDialog() {
+    const plan = state.pendingShufflePlan;
+    if (!plan) {
+      return;
+    }
+
+    shuffleDialogDate.textContent = `${plan.date} ${plan.weekday}`;
+    shuffleDialogDishes.replaceChildren(
+      ...plan.dishes.map((dish) => createTextElement("span", "shuffle-dialog-dish", dish)),
+    );
+  }
+
+  function openShuffleDialog(triggerButton) {
+    closeSheet();
+    state.pendingShuffleTrigger = triggerButton;
+    state.pendingShufflePlan = getNextShufflePlan();
+    renderShuffleDialog();
+    pulseShuffleButton(triggerButton);
+    shuffleDialog.returnValue = "";
+    if (typeof shuffleDialog.showModal === "function") {
+      shuffleDialog.showModal();
+    }
+  }
+
+  function refreshShuffleDialogPlan() {
+    state.pendingShufflePlan = getNextShufflePlan();
+    renderShuffleDialog();
+    pulseShuffleButton(state.pendingShuffleTrigger);
+  }
+
+  function confirmShufflePlan() {
+    const plan = state.pendingShufflePlan;
+    if (!plan) {
+      return;
+    }
+
+    const syncedState = syncPlanReplacementState(state, plan);
+    state.mealRecords = syncedState.mealRecords;
+    state.menuOverrides = syncedState.menuOverrides;
+    saveMealRecords();
+    saveMenuOverrides();
+    state.pendingShufflePlan = null;
+    state.pendingShuffleTrigger = null;
+    if (shuffleDialog.open) {
+      shuffleDialog.close();
+    }
+    showSelectedDate(plan.date);
+    refreshFromRecords();
+    animateRecommendationChange();
+    showToast("已替换");
+  }
+
+  shuffleDialog.addEventListener("close", () => {
+    if (shuffleDialog.returnValue !== "confirm") {
+      state.pendingShufflePlan = null;
+      state.pendingShuffleTrigger = null;
+    }
+  });
 
   dockButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -893,8 +983,14 @@
 
   shuffleButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      shuffleCurrentPlan(button);
+      openShuffleDialog(button);
     });
+  });
+
+  shuffleRefreshButton.addEventListener("click", refreshShuffleDialogPlan);
+  shuffleConfirmButton.addEventListener("click", () => {
+    shuffleDialog.returnValue = "confirm";
+    confirmShufflePlan();
   });
 
   todayButton.addEventListener("click", () => {

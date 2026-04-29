@@ -35,6 +35,27 @@ test("dock navigation only keeps today, shuffle, and more", () => {
   assert.match(html, /data-sheet-target="records"/);
 });
 
+test("shuffle opens a confirmation food dialog before replacing the selected date", () => {
+  assert.match(html, /id="shuffleDialog"/);
+  assert.match(html, /id="shuffleDialogDishes"/);
+  assert.match(html, /id="shuffleConfirmButton"/);
+  assert.match(html, /id="shuffleRefreshButton"/);
+  assert.match(appScript, /pendingShufflePlan:\s*null/);
+  assert.match(appScript, /function openShuffleDialog\(triggerButton\)/);
+  assert.match(appScript, /function confirmShufflePlan\(\)/);
+  assert.match(appScript, /state\.pendingShufflePlan = getNextShufflePlan\(\)/);
+  assert.match(appScript, /shuffleDialog\.showModal\(\)/);
+  assert.match(appScript, /const syncedState = syncPlanReplacementState\(state,\s*plan\)/);
+  assert.match(appScript, /state\.menuOverrides = syncedState\.menuOverrides/);
+  assert.match(appScript, /state\.mealRecords = syncedState\.mealRecords/);
+  assert.match(appScript, /showSelectedDate\(plan\.date\)/);
+  assert.match(appScript, /refreshFromRecords\(\)/);
+  assert.match(appScript, /shuffleDialog\.returnValue = ""/);
+  assert.doesNotMatch(appScript, /function shuffleCurrentPlan\(triggerButton\)[\s\S]*?render\(plan\);/);
+  assert.match(css, /\.shuffle-dialog/);
+  assert.match(css, /\.shuffle-dialog-dishes/);
+});
+
 test("sheet and dock have transition styles with reduced motion fallback", () => {
   assert.match(css, /\.dock-nav/);
   assert.match(css, /\.app-sheet/);
@@ -86,10 +107,23 @@ test("dish replacement uses menu overrides instead of creating future meal recor
   assert.match(appScript, /menuOverrides:\s*mealData\.menuOverrides/);
   assert.match(appScript, /applyMenuOverridesToPlan\(applyMealRecordsToPlan\(MENU_PLAN,\s*state\.mealRecords\),\s*state\.menuOverrides\)/);
   assert.match(appScript, /migratedFutureRecord/);
+  assert.match(appScript, /syncPlanReplacementState/);
+  assert.match(appScript, /const syncedState = syncPlanReplacementState\(state,\s*replaced\)/);
+  assert.match(appScript, /state\.mealRecords = syncedState\.mealRecords/);
+  assert.match(appScript, /state\.menuOverrides = syncedState\.menuOverrides/);
+  assert.match(appScript, /saveMealRecords\(\)/);
   assert.match(appScript, /saveMenuOverrides\(\)/);
-  assert.match(appScript, /if \(target\.sourceView === "records"\)/);
+  assert.doesNotMatch(appScript, /if \(target\.sourceView === "records"\)/);
   assert.doesNotMatch(appScript, /isExistingRecord/);
   assert.doesNotMatch(appScript, /state\.mealRecords\.some\(\(record\) => record\.date === replaced\.date\)/);
+});
+
+test("record replacements use the recorded date row as the replacement source", () => {
+  assert.match(appScript, /function getRecordPlanForDate\(date\)/);
+  assert.match(appScript, /state\.mealRecords\.find\(\(record\) => record\.date === date\)/);
+  assert.match(appScript, /const dishes = comboToDishes\(combo\)/);
+  assert.match(appScript, /if \(sourceView === "records"\)/);
+  assert.match(appScript, /return getRecordPlanForDate\(date\) \?\? getPlanForDate\(date,\s*getEffectivePlan\(\)\)/);
 });
 
 test("manual meal records cannot be created for future dates", () => {
